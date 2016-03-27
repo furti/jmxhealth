@@ -40,6 +40,10 @@ public class RemoteConnection {
 		return connector;
 	}
 
+	public RemoteServer getServerConfig() {
+		return serverConfig;
+	}
+
 	public List<AttributeState> poll() throws Exception {
 		List<AttributeState> result = new ArrayList<>();
 

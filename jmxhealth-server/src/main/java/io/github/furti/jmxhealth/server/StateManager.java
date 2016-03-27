@@ -3,20 +3,25 @@ package io.github.furti.jmxhealth.server;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.springframework.stereotype.Service;
 
 import io.github.furti.jmxhealth.AttributeState;
 import io.github.furti.jmxhealth.HealthState;
+import io.github.furti.jmxhealth.server.config.RemoteServer;
 
 @Service
 public class StateManager {
 
 	private List<AttributeState> selfState;
+	private Queue<RemoteState> remoteStates;
 
 	public StateManager() {
 		super();
 		this.selfState = new ArrayList<>();
+		this.remoteStates = new ConcurrentLinkedQueue<>();
 
 		this.selfState.add(new AttributeState("ServerState", HealthState.OK));
 	}
@@ -50,5 +55,34 @@ public class StateManager {
 
 	public List<AttributeState> getSelfState() {
 		return selfState;
+	}
+
+	public void remoteState(RemoteServer remoteServer, List<AttributeState> attributeStates) {
+		this.removeRemoteState(remoteServer);
+		this.remoteStates
+				.offer(new RemoteState(remoteServer.getApplication(), remoteServer.getEnvironment(), attributeStates));
+	}
+
+	private void removeRemoteState(RemoteServer toDelete) {
+		Iterator<RemoteState> it = this.remoteStates.iterator();
+
+		while (it.hasNext()) {
+			RemoteState state = it.next();
+
+			if (state.getApplication().equals(toDelete.getApplication())
+					&& state.getEnvironment().equals(toDelete.getEnvironment())) {
+				it.remove();
+			}
+		}
+	}
+
+	public RemoteState getRemoteState(String application, String environment) throws RemoteStateNotFoundException {
+		for (RemoteState remoteState : this.remoteStates) {
+			if (remoteState.getApplication().equals(application) && remoteState.getEnvironment().equals(environment)) {
+				return remoteState;
+			}
+		}
+
+		throw new RemoteStateNotFoundException(application, environment);
 	}
 }

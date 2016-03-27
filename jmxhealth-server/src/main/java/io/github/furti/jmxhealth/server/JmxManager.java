@@ -3,6 +3,7 @@ package io.github.furti.jmxhealth.server;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import org.springframework.web.context.ServletContextAware;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.furti.jmxhealth.AttributeState;
+import io.github.furti.jmxhealth.HealthState;
 import io.github.furti.jmxhealth.server.config.RemoteConfig;
 import io.github.furti.jmxhealth.server.config.RemoteServer;
 
@@ -59,11 +61,12 @@ public class JmxManager implements ServletContextAware {
 
 		for (RemoteConnection connection : this.connections) {
 			try {
-				List<AttributeState> result = connection.poll();
-
-				System.out.println(result);
+				this.stateManager.remoteState(connection.getServerConfig(), connection.poll());
 			} catch (Exception ex) {
-				LOG.error("Error polling " + connection);
+				LOG.error("Error polling " + connection.getServerConfig(), ex);
+				this.stateManager.remoteState(connection.getServerConfig(),
+						Arrays.asList(new AttributeState("POLL", HealthState.ALERT,
+								HealthUtils.createMessageWithStacktrace("Error polling Remote Server", ex))));
 			}
 		}
 	}

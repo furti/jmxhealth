@@ -41,19 +41,19 @@ public final class HealthUtils {
 		return builder.toString();
 	}
 
-	public static StateResponse toStateResponse(List<AttributeState> states) {
+	public static StateResponse toStateResponse(String application, String environment, List<AttributeState> states) {
 		Optional<HealthState> overallState = states.stream().map((attributeState) -> attributeState.getState())
 				.max((state1, state2) -> {
 					return state1.getWeight() - state2.getWeight();
 				});
 
 		if (overallState.get() == HealthState.OK) {
-			return new StateResponse(overallState.get());
+			return new StateResponse(application, environment, overallState.get());
 		}
 
 		List<AttributeState> unsuccessfulStates = states.stream()
 				.filter((attributeState) -> attributeState.getState() != HealthState.OK).collect(Collectors.toList());
 
-		return new StateResponse(overallState.get(), unsuccessfulStates);
+		return new StateResponse(application, environment, overallState.get(), unsuccessfulStates);
 	}
 }
