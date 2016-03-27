@@ -63,7 +63,7 @@ public class JmxManager implements ServletContextAware {
 
 				System.out.println(result);
 			} catch (Exception ex) {
-				// TODO: handle failed state
+				LOG.error("Error polling " + connection);
 			}
 		}
 	}
@@ -103,8 +103,7 @@ public class JmxManager implements ServletContextAware {
 
 				LOG.error("Error connection to " + server, e);
 
-				this.stateManager.failed("Connection-" + server.getHost() + ":" + server.getPort(),
-						"Error connection to remote server", e);
+				this.stateManager.failed(server.toString(), "Error connecting to remote server", e);
 			}
 		});
 
@@ -124,12 +123,11 @@ public class JmxManager implements ServletContextAware {
 				this.connectToServer(server);
 				it.remove();
 
-				this.stateManager.removeFailedState("Connection-" + server.getHost() + ":" + server.getPort());
+				this.stateManager.removeFailedState(server.toString());
 			} catch (Exception e) {
 				LOG.error("Error connection to " + server, e);
-				
-				this.stateManager.failed("Connection-" + server.getHost() + ":" + server.getPort(),
-						"Error connection to remote server", e);
+
+				this.stateManager.failed(server.toString(), "Error connecting to remote server", e);
 			}
 		}
 	}
