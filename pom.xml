@@ -36,6 +36,7 @@
 	<modules>
 		<module>jmxhealth-api</module>
 		<module>jmxhealth-server</module>
+		<module>jmxhealth-test-webapp</module>
 	</modules>
 
 	<build>
