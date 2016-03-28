@@ -17,7 +17,7 @@ public class TestWebappController {
 		int percentage = 55;
 
 		if (type.equals(TYPE_ALERT)) {
-			percentage = 80;
+			percentage = 70;
 		}
 
 		List<TestBean> list = new ArrayList<>();
@@ -30,6 +30,8 @@ public class TestWebappController {
 			used = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 		}
 
+		Runtime.getRuntime().gc();
+
 		try
 
 		{
@@ -39,6 +41,7 @@ public class TestWebappController {
 		}
 
 		list.clear();
+		Runtime.getRuntime().gc();
 
 		return "DONE";
 	}

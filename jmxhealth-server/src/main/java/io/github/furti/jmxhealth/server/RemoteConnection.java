@@ -15,6 +15,7 @@ import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 
 import io.github.furti.jmxhealth.AttributeState;
+import io.github.furti.jmxhealth.HealthState;
 import io.github.furti.jmxhealth.server.config.RemoteServer;
 import io.github.furti.jmxhealth.server.config.WatchedAttribute;
 import io.github.furti.jmxhealth.server.config.Watcher;
@@ -63,12 +64,18 @@ public class RemoteConnection {
 
 		for (Attribute mBeanAttribute : mBeanAttributes.asList()) {
 			WatchedAttribute watchedAttribute = watchedAttributes.get(mBeanAttribute.getName());
+			
+			try {
 
-			ValidationResult validationresult = watchedAttribute.getType().validate(mBeanAttribute.getValue(),
-					watchedAttribute.getValidationConfig());
+				ValidationResult validationresult = watchedAttribute.getType().validate(mBeanAttribute.getValue(),
+						watchedAttribute.getValidationConfig());
 
-			result.add(new AttributeState(mBeanAttribute.getName(), validationresult.getState(),
-					validationresult.getMessage()));
+				result.add(new AttributeState(watchedAttribute.getDisplayName(), validationresult.getState(),
+						validationresult.getMessage()));
+			} catch (Exception ex) {
+				result.add(new AttributeState(watchedAttribute.getDisplayName(), HealthState.ALERT,
+						HealthUtils.createMessageWithStacktrace("Error validating attribute", ex)));
+			}
 		}
 
 		return result;
