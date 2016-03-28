@@ -153,7 +153,7 @@ public class JmxManager implements ServletContextAware {
 		LOG.info("Connecting to " + server);
 
 		JMXServiceURL url = new JMXServiceURL(
-				"service:jmx:rmi://localhost/jndi/rmi://" + server.getHost() + ":" + server.getPort() + "/jmxrmi");
+				"service:jmx:rmi:///jndi/rmi://" + server.getHost() + ":" + server.getPort() + "/jmxrmi");
 
 		JMXConnector connector = JMXConnectorFactory.connect(url, null);
 		MBeanServerConnection connection = connector.getMBeanServerConnection();
