@@ -31,8 +31,6 @@ public class HealthController {
 	public StateResponse environmentAndApplicationState(@PathVariable("environment") String environment,
 			@PathVariable("application") String application) throws RemoteStateNotFoundException {
 
-		RemoteState state = this.stateManager.getRemoteState(application, environment);
-
-		return HealthUtils.toStateResponse(state.getApplication(), state.getEnvironment(), state.getAttributes());
+		return this.stateManager.getRemoteState(application, environment);
 	}
 }

@@ -18,6 +18,8 @@ import io.github.furti.jmxhealth.StateResponse;
 
 public final class HealthUtils {
 
+	public static final String CONFIG_KEY = "io.github.furti.jmxhealth.data-location";
+
 	private HealthUtils() {
 
 	}

@@ -9,6 +9,10 @@ public class AttributeState {
 	private String message;
 	private LocalDateTime timestamp;
 
+	public AttributeState() {
+
+	}
+
 	public AttributeState(String attributeName, HealthState state) {
 		this(attributeName, state, null);
 	}

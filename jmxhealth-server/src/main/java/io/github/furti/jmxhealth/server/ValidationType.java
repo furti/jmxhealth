@@ -3,11 +3,12 @@ package io.github.furti.jmxhealth.server;
 import java.util.Map;
 
 import io.github.furti.jmxhealth.server.validation.AttributeValidator;
+import io.github.furti.jmxhealth.server.validation.EqualsValidator;
 import io.github.furti.jmxhealth.server.validation.PercentageValidator;
 import io.github.furti.jmxhealth.server.validation.ValidationResult;
 
 public enum ValidationType {
-	PERCENTAGE(new PercentageValidator());
+	PERCENTAGE(new PercentageValidator()), EQUALS(new EqualsValidator());
 
 	private AttributeValidator validator;
 

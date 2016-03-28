@@ -17,6 +17,7 @@ import javax.servlet.ServletContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -33,8 +34,9 @@ import io.github.furti.jmxhealth.server.config.RemoteServer;
 public class JmxManager implements ServletContextAware {
 	private static final Logger LOG = LoggerFactory.getLogger(JmxManager.class);
 
-	private static final String CONFIG_KEY = "io.github.furti.jmxhealth.data-location";
+	@Value("${" + HealthUtils.CONFIG_KEY + "}")
 	private String dataLocation = null;
+
 	private ObjectMapper objectMapper;
 	private List<RemoteConnection> connections;
 	private StateManager stateManager;
@@ -75,7 +77,7 @@ public class JmxManager implements ServletContextAware {
 	public void configureRemotes() {
 		try {
 			Assert.notNull(dataLocation, "Data location must not be null. Set the path to the data file via "
-					+ CONFIG_KEY + " System Property or Servlet Config Attribute.");
+					+ HealthUtils.CONFIG_KEY + " System Property or Servlet Config Attribute.");
 
 			RemoteConfig config = objectMapper.readValue(new File(dataLocation + "/jmxhealth.json"),
 					RemoteConfig.class);
@@ -162,10 +164,10 @@ public class JmxManager implements ServletContextAware {
 	}
 
 	public void setServletContext(ServletContext servletContext) {
-		if (System.getProperty(CONFIG_KEY) != null) {
-			dataLocation = System.getProperty(CONFIG_KEY);
-		} else {
-			dataLocation = servletContext.getInitParameter(CONFIG_KEY);
-		}
+		// if (System.getProperty(CONFIG_KEY) != null) {
+		// dataLocation = System.getProperty(CONFIG_KEY);
+		// } else {
+		// dataLocation = servletContext.getInitParameter(CONFIG_KEY);
+		// }
 	}
 }

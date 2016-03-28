@@ -1,25 +1,46 @@
 package io.github.furti.jmxhealth.server;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.furti.jmxhealth.AttributeState;
 import io.github.furti.jmxhealth.HealthState;
+import io.github.furti.jmxhealth.StateResponse;
 import io.github.furti.jmxhealth.server.config.RemoteServer;
 
 @Service
 public class StateManager {
+	private static final Logger LOG = LoggerFactory.getLogger(StateManager.class);
 
 	private List<AttributeState> selfState;
-	private Queue<RemoteState> remoteStates;
+	private Queue<StateResponse> remoteStates;
+	private ObjectMapper objectMapper;
 
-	public StateManager() {
+	@Value("${" + HealthUtils.CONFIG_KEY + "}")
+	private String dataLocation = null;
+	private TypeReference<List<AttributeState>> attributeStateListType = new TypeReference<List<AttributeState>>() {
+	};
+
+	@Autowired
+	public StateManager(ObjectMapper objectMapper) {
 		super();
+		this.objectMapper = objectMapper;
 		this.selfState = new ArrayList<>();
 		this.remoteStates = new ConcurrentLinkedQueue<>();
 
@@ -59,15 +80,40 @@ public class StateManager {
 
 	public void remoteState(RemoteServer remoteServer, List<AttributeState> attributeStates) {
 		this.removeRemoteState(remoteServer);
-		this.remoteStates
-				.offer(new RemoteState(remoteServer.getApplication(), remoteServer.getEnvironment(), attributeStates));
+
+		StateResponse stateResponse = HealthUtils.toStateResponse(remoteServer.getApplication(),
+				remoteServer.getEnvironment(), attributeStates);
+
+		if (stateResponse.getOverallState() != HealthState.OK) {
+			try {
+				this.writeToDisk(stateResponse);
+				this.removeFailedState(
+						"DISK_STORAGE-" + stateResponse.getApplication() + "-" + stateResponse.getEnvironment());
+			} catch (IOException e) {
+				LOG.error("Error writing to disk", e);
+				this.failed("DISK_STORAGE-" + stateResponse.getApplication() + "-" + stateResponse.getEnvironment(),
+						"Error writing to disk", e);
+			}
+		}
+
+		remoteStates.add(stateResponse);
+	}
+
+	public StateResponse getRemoteState(String application, String environment) throws RemoteStateNotFoundException {
+		for (StateResponse remoteState : this.remoteStates) {
+			if (remoteState.getApplication().equals(application) && remoteState.getEnvironment().equals(environment)) {
+				return remoteState;
+			}
+		}
+
+		throw new RemoteStateNotFoundException(application, environment);
 	}
 
 	private void removeRemoteState(RemoteServer toDelete) {
-		Iterator<RemoteState> it = this.remoteStates.iterator();
+		Iterator<StateResponse> it = this.remoteStates.iterator();
 
 		while (it.hasNext()) {
-			RemoteState state = it.next();
+			StateResponse state = it.next();
 
 			if (state.getApplication().equals(toDelete.getApplication())
 					&& state.getEnvironment().equals(toDelete.getEnvironment())) {
@@ -76,13 +122,20 @@ public class StateManager {
 		}
 	}
 
-	public RemoteState getRemoteState(String application, String environment) throws RemoteStateNotFoundException {
-		for (RemoteState remoteState : this.remoteStates) {
-			if (remoteState.getApplication().equals(application) && remoteState.getEnvironment().equals(environment)) {
-				return remoteState;
-			}
+	private void writeToDisk(StateResponse stateResponse) throws IOException {
+		Path path = Paths.get(dataLocation,
+				stateResponse.getApplication() + "-" + stateResponse.getEnvironment() + ".json");
+
+		List<AttributeState> currentStates = null;
+
+		if (!Files.exists(path)) {
+			Files.createFile(path);
+			currentStates = new ArrayList<>();
+		} else {
+			currentStates = objectMapper.readValue(path.toFile(), attributeStateListType);
 		}
 
-		throw new RemoteStateNotFoundException(application, environment);
+		currentStates.addAll(stateResponse.getUnsuccessfulAttributes());
+		objectMapper.writeValue(path.toFile(), currentStates);
 	}
 }
