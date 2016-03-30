@@ -17,6 +17,11 @@
 				<artifactId>jmxhealth-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>io.github.furti.jmxhealth</groupId>
+				<artifactId>jmxhealth-crypt</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>io.github.furti.jmxhealth</groupId>
@@ -37,6 +42,7 @@
 		<module>jmxhealth-api</module>
 		<module>jmxhealth-server</module>
 		<module>jmxhealth-test-webapp</module>
+		<module>jmxhealth-crypt</module>
 	</modules>
 
 	<build>

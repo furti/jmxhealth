@@ -1,18 +1,18 @@
 package io.github.furti.jmxhealth.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import javax.servlet.ServletContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,17 +21,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.web.context.ServletContextAware;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.furti.jmxhealth.AttributeState;
 import io.github.furti.jmxhealth.HealthState;
+import io.github.furti.jmxhealth.crypt.CryptUtils;
 import io.github.furti.jmxhealth.server.config.RemoteConfig;
 import io.github.furti.jmxhealth.server.config.RemoteServer;
 
 @Service
-public class JmxManager implements ServletContextAware {
+public class JmxManager {
 	private static final Logger LOG = LoggerFactory.getLogger(JmxManager.class);
 
 	@Value("${" + HealthUtils.CONFIG_KEY + "}")
@@ -137,7 +137,7 @@ public class JmxManager implements ServletContextAware {
 		}
 	}
 
-	private void connectToServer(RemoteServer server) throws IOException {
+	private void connectToServer(RemoteServer server) throws Exception {
 		this.validateServerConfig(server);
 
 		RemoteConnection connection = this.createConnection(server);
@@ -151,23 +151,28 @@ public class JmxManager implements ServletContextAware {
 		}
 	}
 
-	private RemoteConnection createConnection(RemoteServer server) throws IOException {
+	private RemoteConnection createConnection(RemoteServer server) throws Exception {
 		LOG.info("Connecting to " + server);
 
 		JMXServiceURL url = new JMXServiceURL(
 				"service:jmx:rmi:///jndi/rmi://" + server.getHost() + ":" + server.getPort() + "/jmxrmi");
 
-		JMXConnector connector = JMXConnectorFactory.connect(url, null);
+		JMXConnector connector = JMXConnectorFactory.connect(url, buildEnv(server));
 		MBeanServerConnection connection = connector.getMBeanServerConnection();
 
 		return new RemoteConnection(connection, connector, server);
 	}
 
-	public void setServletContext(ServletContext servletContext) {
-		// if (System.getProperty(CONFIG_KEY) != null) {
-		// dataLocation = System.getProperty(CONFIG_KEY);
-		// } else {
-		// dataLocation = servletContext.getInitParameter(CONFIG_KEY);
-		// }
+	private Map<String, ?> buildEnv(RemoteServer server) throws Exception {
+		Map<String, Object> env = null;
+
+		if (server.getPassword() != null && server.getUsername() != null) {
+			env = new HashMap<>();
+
+			String[] creds = { server.getUsername(), CryptUtils.decrypt(server.getPassword()) };
+			env.put(JMXConnector.CREDENTIALS, creds);
+		}
+
+		return env;
 	}
 }

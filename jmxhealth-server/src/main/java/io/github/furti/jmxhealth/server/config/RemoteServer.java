@@ -4,10 +4,29 @@ import java.util.List;
 
 public class RemoteServer {
 
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 	private String application;
 	private String environment;
 	private String host;
 	private Integer port;
+	private String username;
+	private String password;
+
 	private List<Watcher> watchers;
 
 	public List<Watcher> getWatchers() {
