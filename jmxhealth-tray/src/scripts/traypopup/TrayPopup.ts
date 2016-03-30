@@ -39,12 +39,7 @@ namespace jmxhealth {
         }
     }
 
-    angular.module('jmxhealth.popup', ['ngMaterial'])
-        .config(['$mdThemingProvider', function($mdThemingProvider) {
-            $mdThemingProvider.theme('default')
-                .primaryPalette('pink')
-                .accentPalette('orange');
-        }])
+    angular.module('jmxhealth.popup', ['jmxhealth.common'])
         .component('stateList', {
             controller: StateListController,
             templateUrl: './state-list.html'

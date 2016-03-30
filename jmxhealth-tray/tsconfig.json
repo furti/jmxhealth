@@ -9,6 +9,7 @@
     "./src/scripts/**/*.ts"
   ],
   "files": [
+    "./src/scripts/CommonConfig.ts",
     "./src/scripts/include.d.ts",
     "./src/scripts/Main.ts",
     "./src/scripts/TrayManager.ts",

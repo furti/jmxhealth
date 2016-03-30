@@ -1,5 +1,5 @@
 <md-list flex>
-  <md-subheader class="md-no-sticky" ng-repeat-start="(environment, states) in $ctrl.statesByEnvironment">{{environment}}</md-subheader>
+  <md-subheader class="md-no-sticky md-primary" ng-repeat-start="(environment, states) in $ctrl.statesByEnvironment">{{environment}}</md-subheader>
   <md-list-item class="md-3-line" ng-repeat="state in states">
     <img ng-src="{{$ctrl.stateIcon(state)}}" class="md-avatar" />
     <div class="md-list-item-text" layout="column">

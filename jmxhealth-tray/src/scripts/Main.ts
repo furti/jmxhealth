@@ -1,3 +1,3 @@
 namespace jmxtray {
-  angular.module('jmxhealth', ['ngMaterial', 'jmxhealth.tray']);
+  angular.module('jmxhealth', ['jmxhealth.common', 'jmxhealth.tray']);
 }
