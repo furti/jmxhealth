@@ -1,0 +1,28 @@
+{
+  "name": "jmxhealth-tray",
+  "version": "0.0.1",
+  "description": "System Tray application to watch jmxhealth monitored applications",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-typescript": "^2.10.0"
+  },
+  "author": "Daniel Furtlehner",
+  "license": "MIT",
+  "window": {
+    "width": 1024,
+    "height": 768,
+    "icon": "icons/network_check.png"
+  },
+  "dependencies": {
+    "angular": "^1.5.3",
+    "angular-animate": "^1.5.3",
+    "angular-aria": "^1.5.3",
+    "angular-material": "^1.0.6",
+    "angular-messages": "^1.5.3"
+  }
+}

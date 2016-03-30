@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "outDir": "./target/",
+    "target": "es5",
+    "module": "commonjs",
+    "rootDir": "./src/scripts/"
+  },
+  "filesGlob": [
+    "./src/scripts/**/*.ts"
+  ],
+  "files": [
+    "./src/scripts/include.d.ts",
+    "./src/scripts/Main.ts",
+    "./src/scripts/Tray.ts"
+  ],
+  "atom": {
+    "rewriteTsconfig": true
+  },
+  "compileOnSave": false
+}
