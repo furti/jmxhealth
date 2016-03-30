@@ -1,6 +1,7 @@
 namespace jmxhealth {
     // Load native UI library
     var gui = require('nw.gui'),
+        pubsub = require('pubsub-js'),
         currentWindow = gui.Window.get(),
         popupWidth = 200,
         popupHeight = 400;
@@ -21,6 +22,22 @@ namespace jmxhealth {
 
             this.tray = new gui.Tray({ title: 'Jmxhealth', icon: 'icons/network_check.png' });
             this.tray.on('click', () => this.showPopup());
+
+            pubsub.subscribe(OVERALL_STATE, (msg, data) => {
+                var icon;
+
+                if (data === 'ALERT') {
+                    icon = 'icons/error.png';
+                }
+                else if (data === 'WARN') {
+                    icon = 'icons/warning.png';
+                }
+                else if (data === 'OK') {
+                    icon = 'icons/network_check.png';
+                }
+
+                this.tray.icon = icon;
+            });
 
             this.setupContextMenu();
             this.initPopupWindow();
