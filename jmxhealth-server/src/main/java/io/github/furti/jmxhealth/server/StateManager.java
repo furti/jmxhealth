@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -123,8 +125,10 @@ public class StateManager {
 	}
 
 	private void writeToDisk(StateResponse stateResponse) throws IOException {
+		String now = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+
 		Path path = Paths.get(dataLocation,
-				stateResponse.getApplication() + "-" + stateResponse.getEnvironment() + ".json");
+				stateResponse.getApplication() + "-" + stateResponse.getEnvironment() + "_" + now + ".json");
 
 		List<AttributeState> currentStates = null;
 
