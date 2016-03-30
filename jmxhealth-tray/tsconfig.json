@@ -11,7 +11,8 @@
   "files": [
     "./src/scripts/include.d.ts",
     "./src/scripts/Main.ts",
-    "./src/scripts/TrayManager.ts"
+    "./src/scripts/TrayManager.ts",
+    "./src/scripts/traypopup/TrayPopup.ts"
   ],
   "atom": {
     "rewriteTsconfig": true
