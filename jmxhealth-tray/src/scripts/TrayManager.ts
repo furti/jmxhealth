@@ -1,7 +1,7 @@
 namespace jmxhealth {
     // Load native UI library
     var gui = require('nw.gui'),
-        window = gui.Window.get(),
+        currentWindow = gui.Window.get(),
         popupWidth = 200,
         popupHeight = 400;
 
@@ -20,14 +20,14 @@ namespace jmxhealth {
             }
 
             this.tray = new gui.Tray({ title: 'Jmxhealth', icon: 'icons/network_check.png' });
-            this.tray.on('click', (event) => this.showPopup(event));
+            this.tray.on('click', () => this.showPopup());
 
             this.setupContextMenu();
             this.initPopupWindow();
         }
 
-        private showPopup(event: any): void {
-            this.popup.moveTo(event.x - popupWidth, event.y - popupHeight - 10);
+        private showPopup(): void {
+            this.popup.moveTo(window.screen.availWidth - popupWidth - 100, window.screen.availHeight - popupHeight - 50);
             this.popup.show();
             this.popup.focus();
         }
@@ -43,18 +43,17 @@ namespace jmxhealth {
 
         private close(): void {
             this.popup.close(true);
-            window.close();
+            currentWindow.close();
         }
 
         private initPopupWindow(): void {
             // create window
             var params = {
                 toolbar: true,
-                frame: false,
-                transparent: false,
+                frame: true,
                 resizable: false,
                 show: false,
-                show_in_taskbar: false,
+                show_in_taskbar: true,
                 width: popupWidth,
                 height: popupHeight
             };
@@ -65,9 +64,9 @@ namespace jmxhealth {
                 this.popup.hide();
             });
 
-            this.popup.on('blur', (event: any) => {
-                this.popup.hide();
-            });
+            // this.popup.on('blur', (event: any) => {
+            //     this.popup.hide();
+            // });
         }
     }
 
