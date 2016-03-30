@@ -1,5 +1,6 @@
 namespace jmxhealth {
     export const OVERALL_STATE = 'jmxhealth.overallstate';
+    export const STATES = 'jmxhealth.states';
 
     angular.module('jmxhealth.common', ['ngMaterial'])
         .config(['$mdThemingProvider', function($mdThemingProvider) {

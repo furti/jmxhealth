@@ -1,25 +1,15 @@
 namespace jmxhealth {
+    var pubsub = require('pubsub-js');
 
     class StateListController {
         public statesByEnvironment: { [environment: string]: api.StateResponse[] };
+        public static $injects = ['$scope'];
 
-        constructor() {
-            this.statesByEnvironment = {
-                'PROD': [{
-                    application: 'test',
-                    environment: 'PROD',
-                    overallState: 'OK'
-                }, {
-                        application: 'other',
-                        environment: 'PROD',
-                        overallState: 'ALERT'
-                    }],
-                'QA': [{
-                    application: 'third',
-                    environment: 'QA',
-                    overallState: 'WARN'
-                }]
-            };
+        constructor($scope: angular.IScope) {
+            pubsub.subscribe(STATES, (message: string, states: api.StateResponse[]) => {
+                this.statesByEnvironment = this.prepareStates(states);
+                $scope.$apply();
+            });
         }
 
         public stateIcon(state: api.StateResponse): string {
@@ -36,6 +26,20 @@ namespace jmxhealth {
             }
 
             return icon + '.png';
+        }
+
+        private prepareStates(states: api.StateResponse[]): { [environment: string]: api.StateResponse[] } {
+            var grouped: { [environment: string]: api.StateResponse[] } = {};
+
+            states.forEach(function(state) {
+                if (!grouped[state.environment]) {
+                    grouped[state.environment] = [];
+                }
+
+                grouped[state.environment].push(state);
+            });
+
+            return grouped;
         }
     }
 
