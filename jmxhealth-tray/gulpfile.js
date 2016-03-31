@@ -21,7 +21,19 @@ gulp.task('ts', function() {
     .pipe(gulp.dest(tsconfig.compilerOptions.outDir));
 });
 
-gulp.task('build', ['ts', 'html']);
+gulp.task('lib', function() {
+  gulp.src([
+    './node_modules/angular/angular.js',
+    './node_modules/angular-animate/angular-animate.js',
+    './node_modules/angular-aria/angular-aria.js',
+    './node_modules/angular-messages/angular-messages.js',
+    './node_modules/angular-material/angular-material.js',
+    './node_modules/angular-material/angular-material.css'
+  ])
+    .pipe(gulp.dest('./target/lib'));
+});
+
+gulp.task('build', ['ts', 'html', 'lib']);
 
 gulp.task('watch', ['build'], function() {
   gulp.watch(tsconfig.filesGlob, ['ts']);
