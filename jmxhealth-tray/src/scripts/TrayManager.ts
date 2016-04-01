@@ -44,6 +44,10 @@ namespace jmxhealth {
         }
 
         private showPopup(): void {
+            if (!this.popup) {
+                return;
+            }
+
             this.popup.moveTo(window.screen.availWidth - popupWidth - 100, window.screen.availHeight - popupHeight - 50);
             this.popup.show();
             this.popup.focus();
@@ -66,24 +70,21 @@ namespace jmxhealth {
         private initPopupWindow(): void {
             // create window
             var params = {
-                toolbar: true,
                 frame: true,
                 resizable: false,
                 show: false,
-                show_in_taskbar: true,
+                // showInTaskbar: true,
                 width: popupWidth,
-                height: popupHeight
+                height: popupHeight,
+                id: 'popup'
             };
 
-            this.popup = gui.Window.open('./target/templates/tray-popup.html', params);
-
-            this.popup.on('close', (event: any) => {
-                this.popup.hide();
+            gui.Window.open('./target/templates/tray-popup.html', params, (win) => {
+                this.popup = win;
+                this.popup.on('close', (event: any) => {
+                    this.popup.hide();
+                });
             });
-
-            // this.popup.on('blur', (event: any) => {
-            //     this.popup.hide();
-            // });
         }
     }
 

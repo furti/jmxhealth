@@ -18,7 +18,6 @@
     "height": 768,
     "icon": "icons/network_check.png",
     "show": true,
-    "show_in_taskbar": false
   },
   "dependencies": {
     "angular": "^1.5.3",
