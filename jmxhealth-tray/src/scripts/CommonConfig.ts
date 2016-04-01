@@ -1,6 +1,9 @@
 namespace jmxhealth {
+    export const NO_SERVERS = 'jmxhealth.noservers';
     export const OVERALL_STATE = 'jmxhealth.overallstate';
     export const STATES = 'jmxhealth.states';
+    export const START = 'jmxhealth.start';
+    export const INITIALIZED = 'jmxhealth.initialized';
 
     angular.module('jmxhealth.common', ['ngMaterial'])
         .config(['$mdThemingProvider', '$compileProvider', function($mdThemingProvider, $compileProvider: angular.ICompileProvider) {

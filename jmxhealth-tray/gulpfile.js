@@ -3,6 +3,7 @@ var gulp = require('gulp'),
   // concat = require('gulp-concat'),
   tsconfig = require('./tsconfig.json'),
   htmlPattern = './src/templates/**',
+  cssPattern = './src/styles/**',
   tsProject = ts.createProject('./tsconfig.json', {
     sortOutput: true
   });
@@ -10,6 +11,11 @@ var gulp = require('gulp'),
 gulp.task('html', function() {
   gulp.src(htmlPattern)
     .pipe(gulp.dest('./target/templates'));
+});
+
+gulp.task('css', function() {
+  gulp.src(cssPattern)
+    .pipe(gulp.dest('./target/styles'));
 });
 
 gulp.task('ts', function() {
@@ -33,9 +39,10 @@ gulp.task('lib', function() {
     .pipe(gulp.dest('./target/lib'));
 });
 
-gulp.task('build', ['ts', 'html', 'lib']);
+gulp.task('build', ['ts', 'html', 'lib', 'css']);
 
 gulp.task('watch', ['build'], function() {
   gulp.watch(tsconfig.filesGlob, ['ts']);
   gulp.watch(htmlPattern, ['html']);
+  gulp.watch(cssPattern, ['css']);
 });

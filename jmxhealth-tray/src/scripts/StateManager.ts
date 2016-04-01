@@ -1,6 +1,7 @@
 namespace jmxhealth {
     var pubsub = require('pubsub-js'),
         stateManager: StateManager,
+        config: TrayConfig = require('./config.json'),
         stateWeight = {
             'ALERT': 30,
             'WARN': 20,
@@ -13,32 +14,38 @@ namespace jmxhealth {
         }
 
         public start(): void {
-            this.$interval(() => {
-                this.poll();
-            }, 10000, 0, false);
+            console.log('start called');
+            if (!config.servers || config.servers.length === 0) {
+                pubsub.publish(NO_SERVERS, 'No Servers configured');
+            }
+            else {
+                this.$interval(() => {
+                    this.poll();
+                }, 10000, 0, false);
+            }
         }
 
         private poll(): void {
-            var states: api.StateResponse[] = [
-                {
-                    application: 'prod' + Math.random(),
-                    environment: 'PROD',
-                    overallState: this.randomState(Math.random())
-                },
-                {
-                    application: 'qa' + Math.random(),
-                    environment: 'QA',
-                    overallState: this.randomState(Math.random())
-                },
-                {
-                    application: 'test' + Math.random(),
-                    environment: 'TEST',
-                    overallState: this.randomState(Math.random())
-                }];
-
-            var overallState = this.getOverallStates(states);
-            pubsub.publish(STATES, states);
-            pubsub.publish(OVERALL_STATE, overallState);
+            // var states: api.StateResponse[] = [
+            //     {
+            //         application: 'prod' + Math.random(),
+            //         environment: 'PROD',
+            //         overallState: this.randomState(Math.random())
+            //     },
+            //     {
+            //         application: 'qa' + Math.random(),
+            //         environment: 'QA',
+            //         overallState: this.randomState(Math.random())
+            //     },
+            //     {
+            //         application: 'test' + Math.random(),
+            //         environment: 'TEST',
+            //         overallState: this.randomState(Math.random())
+            //     }];
+            //
+            // var overallState = this.getOverallStates(states);
+            // pubsub.publish(STATES, states);
+            // pubsub.publish(OVERALL_STATE, overallState);
         }
 
         private getOverallStates(states: api.StateResponse[]): string {
@@ -68,7 +75,13 @@ namespace jmxhealth {
 
     angular.module('jmxhealth.state', [])
         .run(['$http', '$interval', function($http: angular.IHttpService, $interval: angular.IIntervalService) {
+            console.log('creating state manager');
             stateManager = new StateManager($http, $interval);
-            stateManager.start();
+
+            pubsub.subscribe(START, () => {
+                stateManager.start();
+            });
+
+            pubsub.publish(INITIALIZED, 'StateManager');
         }]);
 }

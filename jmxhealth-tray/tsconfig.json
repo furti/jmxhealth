@@ -13,6 +13,7 @@
     "./src/scripts/include.d.ts",
     "./src/scripts/Main.ts",
     "./src/scripts/StateManager.ts",
+    "./src/scripts/TrayConfig.ts",
     "./src/scripts/TrayManager.ts",
     "./src/scripts/traypopup/TrayPopup.ts"
   ],

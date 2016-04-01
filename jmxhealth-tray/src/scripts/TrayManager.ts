@@ -3,8 +3,8 @@ namespace jmxhealth {
     var gui = require('nw.gui'),
         pubsub = require('pubsub-js'),
         currentWindow = gui.Window.get(),
-        popupWidth = 200,
-        popupHeight = 400;
+        popupWidth = 400,
+        popupHeight = 600;
 
     export class TrayManager {
         private initialized: boolean = false;
@@ -37,6 +37,10 @@ namespace jmxhealth {
                 }
 
                 this.tray.icon = icon;
+            });
+
+            pubsub.subscribe(NO_SERVERS, () => {
+                this.tray.icon = 'icons/warning.png';
             });
 
             this.setupContextMenu();
@@ -73,16 +77,18 @@ namespace jmxhealth {
                 frame: true,
                 resizable: false,
                 show: false,
-                // showInTaskbar: true,
                 width: popupWidth,
-                height: popupHeight,
-                id: 'popup'
+                height: popupHeight
             };
 
             gui.Window.open('./tray-popup.html', params, (win) => {
                 this.popup = win;
                 this.popup.on('close', (event: any) => {
                     this.popup.hide();
+                });
+
+                win.on('loaded', () => {
+                    pubsub.publish(INITIALIZED, 'TrayManager');
                 });
             });
         }

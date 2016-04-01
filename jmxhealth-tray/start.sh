@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./nwjs/nw.exe .
+./nwjs/dev/nw.exe .
