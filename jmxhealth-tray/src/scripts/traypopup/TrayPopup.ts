@@ -13,7 +13,7 @@ namespace jmxhealth {
         }
 
         public stateIcon(state: api.StateResponse): string {
-            var icon = '../../icons/';
+            var icon = './icons/';
 
             if (state.overallState === 'ALERT') {
                 icon += 'error';
@@ -46,6 +46,6 @@ namespace jmxhealth {
     angular.module('jmxhealth.popup', ['jmxhealth.common'])
         .component('stateList', {
             controller: StateListController,
-            templateUrl: './state-list.html'
+            templateUrl: './target/templates/state-list.html'
         });
 }

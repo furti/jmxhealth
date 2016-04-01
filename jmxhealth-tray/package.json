@@ -17,7 +17,7 @@
     "width": 1024,
     "height": 768,
     "icon": "icons/network_check.png",
-    "show": true,
+    "show": true
   },
   "dependencies": {
     "angular": "^1.5.3",

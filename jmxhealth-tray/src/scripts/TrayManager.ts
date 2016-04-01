@@ -79,7 +79,7 @@ namespace jmxhealth {
                 id: 'popup'
             };
 
-            gui.Window.open('./target/templates/tray-popup.html', params, (win) => {
+            gui.Window.open('./tray-popup.html', params, (win) => {
                 this.popup = win;
                 this.popup.on('close', (event: any) => {
                     this.popup.hide();
