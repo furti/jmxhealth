@@ -9,5 +9,13 @@ declare namespace jmxhealth.api {
         application: string;
         environment: string;
         overallState: string;
+        unsuccessfulAttributes?: AttributeState[];
+    }
+
+    interface AttributeState {
+        attributeName: string;
+        state: string;
+        message: string;
+        timestamp: string;
     }
 }
