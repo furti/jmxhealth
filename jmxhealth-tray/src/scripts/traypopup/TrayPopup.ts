@@ -3,12 +3,14 @@ namespace jmxhealth {
 
     class StateListController {
         public statesByEnvironment: { [environment: string]: api.StateResponse[] };
+        public messageTitle: string;
         public message: string;
 
         public static $injects = ['$scope'];
 
         constructor($scope: angular.IScope) {
             pubsub.subscribe(NO_SERVERS, () => {
+                this.messageTitle = 'No Servers';
                 this.message = `There are no servers configured in ${process.cwd()}/config.json. Please configure at least one server and restart the application.`
                 $scope.$apply();
             });

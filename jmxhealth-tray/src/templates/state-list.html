@@ -1,5 +1,8 @@
-<md-content flex layout="column">
-  <p ng-show="$ctrl.message" class="highlight break-all">{{$ctrl.message}}</p>
+<md-content flex layout="column" layout-padding>
+  <div ng-show="$ctrl.message">
+    <h3>{{$ctrl.messageTitle}}</h3>
+    <p class="highlight break-all">{{$ctrl.message}}</p>
+  </div>
 
   <md-list flex ng-hide="$ctrl.message">
     <md-subheader class="md-no-sticky md-primary" ng-repeat-start="(environment, states) in $ctrl.statesByEnvironment">{{environment}}</md-subheader>
