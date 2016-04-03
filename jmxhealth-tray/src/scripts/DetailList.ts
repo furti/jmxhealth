@@ -11,11 +11,9 @@ namespace jmxhealth {
 
         constructor($scope: angular.IScope) {
             pubsub.subscribe(topic.FAILED_STATES, (message, failed) => {
-                if (!this.failedStates) {
-                    this.failedStates = failed;
-                    this.show();
-                    $scope.$apply();
-                }
+                this.failedStates = failed;
+                this.show();
+                $scope.$apply();
             });
 
             pubsub.subscribe(topic.SHOW_DETAIL, (message, state) => {
