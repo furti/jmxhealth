@@ -18,7 +18,7 @@ namespace jmxhealth {
 
         public start(): void {
             if (!config.servers || config.servers.length === 0) {
-                pubsub.publish(NO_SERVERS, 'No Servers configured');
+                pubsub.publish(topic.NO_SERVERS, 'No Servers configured');
             }
             else {
                 this.requests = this.prepareConfig();
@@ -62,9 +62,14 @@ namespace jmxhealth {
                     allStates = allStates.concat(state);
                 });
 
-                var overallState = this.getOverallStates(allStates);
-                pubsub.publish(STATES, allStates);
-                pubsub.publish(OVERALL_STATE, overallState);
+                var filterResult = this.filterFailedStates(allStates);
+
+                if (filterResult.overallState !== 'OK') {
+                    pubsub.publish(topic.FAILED_STATES, filterResult.failedStates);
+                }
+
+                pubsub.publish(topic.STATES, allStates);
+                pubsub.publish(topic.OVERALL_STATE, filterResult.overallState);
             });
         }
 
@@ -77,28 +82,23 @@ namespace jmxhealth {
             }
         }
 
-        private getOverallStates(states: api.StateResponse[]): string {
-            var overallState;
+        private filterFailedStates(states: api.StateResponse[]): FailedStateFilter {
+            var filterResult: FailedStateFilter = {
+                overallState: null,
+                failedStates: []
+            };
 
             for (let state of states) {
-                if (!overallState || stateWeight[state.overallState] > stateWeight[overallState]) {
-                    overallState = state.overallState;
+                if (!filterResult.overallState || stateWeight[state.overallState] > stateWeight[filterResult.overallState]) {
+                    filterResult.overallState = state.overallState;
+                }
+
+                if (state.overallState !== 'OK') {
+                    filterResult.failedStates.push(state);
                 }
             }
 
-            return overallState;
-        }
-
-        private randomState(rand: number): string {
-            if (rand < 0.3) {
-                return 'ALERT';
-            }
-
-            if (rand < 0.6) {
-                return 'WARN';
-            }
-
-            return 'OK';
+            return filterResult;
         }
 
         private prepareConfig(): StateRequest[] {
@@ -120,15 +120,20 @@ namespace jmxhealth {
         serverUrl: string;
     }
 
+    interface FailedStateFilter {
+        overallState: string;
+        failedStates: api.StateResponse[];
+    }
+
     angular.module('jmxhealth.state', [])
         .run(['$http', '$interval', '$q', function($http: angular.IHttpService, $interval: angular.IIntervalService, $q: angular.IQService) {
             console.log('creating state manager');
             stateManager = new StateManager($http, $interval, $q);
 
-            pubsub.subscribe(START, () => {
+            pubsub.subscribe(topic.START, () => {
                 stateManager.start();
             });
 
-            pubsub.publish(INITIALIZED, 'StateManager');
+            pubsub.publish(topic.INITIALIZED, 'StateManager');
         }]);
 }

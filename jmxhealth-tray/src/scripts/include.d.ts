@@ -19,3 +19,12 @@ declare namespace jmxhealth.api {
         timestamp: string;
     }
 }
+
+declare namespace pubsub {
+    export type MessageHandler = (message: string, data: any) => void;
+
+    export class PubSub {
+        subscribe(topic: string, handler: MessageHandler): void;
+        publish(topic: string, data: any): void;
+    }
+}

@@ -1,9 +1,13 @@
 namespace jmxhealth {
-    export const NO_SERVERS = 'jmxhealth.noservers';
-    export const OVERALL_STATE = 'jmxhealth.overallstate';
-    export const STATES = 'jmxhealth.states';
-    export const START = 'jmxhealth.start';
-    export const INITIALIZED = 'jmxhealth.initialized';
+    export namespace topic {
+        export const NO_SERVERS = 'jmxhealth.noservers';
+        export const OVERALL_STATE = 'jmxhealth.overallstate';
+        export const STATES = 'jmxhealth.states';
+        export const FAILED_STATES = 'jmxhealth.failedstates';
+        export const START = 'jmxhealth.start';
+        export const INITIALIZED = 'jmxhealth.initialized';
+        export const SHOW_DETAIL = 'jmxhealth.showdetail';
+    }
 
     angular.module('jmxhealth.common', ['ngMaterial'])
         .config(['$mdThemingProvider', '$compileProvider', function($mdThemingProvider, $compileProvider: angular.ICompileProvider) {

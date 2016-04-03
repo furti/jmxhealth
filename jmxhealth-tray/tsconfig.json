@@ -10,6 +10,7 @@
   ],
   "files": [
     "./src/scripts/CommonConfig.ts",
+    "./src/scripts/DetailList.ts",
     "./src/scripts/include.d.ts",
     "./src/scripts/Main.ts",
     "./src/scripts/StateManager.ts",

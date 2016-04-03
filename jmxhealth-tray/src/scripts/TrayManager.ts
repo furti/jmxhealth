@@ -23,7 +23,7 @@ namespace jmxhealth {
             this.tray = new gui.Tray({ title: 'Jmxhealth', icon: 'icons/network_check.png' });
             this.tray.on('click', () => this.showPopup());
 
-            pubsub.subscribe(OVERALL_STATE, (msg, data) => {
+            pubsub.subscribe(topic.OVERALL_STATE, (msg, data) => {
                 var icon;
 
                 if (data === 'ALERT') {
@@ -39,7 +39,7 @@ namespace jmxhealth {
                 this.tray.icon = icon;
             });
 
-            pubsub.subscribe(NO_SERVERS, () => {
+            pubsub.subscribe(topic.NO_SERVERS, () => {
                 this.tray.icon = 'icons/warning.png';
             });
 
@@ -68,7 +68,7 @@ namespace jmxhealth {
 
         private close(): void {
             this.popup.close(true);
-            currentWindow.close();
+            currentWindow.close(true);
         }
 
         private initPopupWindow(): void {
@@ -88,7 +88,7 @@ namespace jmxhealth {
                 });
 
                 win.on('loaded', () => {
-                    pubsub.publish(INITIALIZED, 'TrayManager');
+                    pubsub.publish(topic.INITIALIZED, 'TrayManager');
                 });
             });
         }
