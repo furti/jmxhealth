@@ -17,9 +17,15 @@
     </md-card-title>
     <md-card-content>
       <md-content>
-        <div ng-repeat="attribute in state.unsuccessfulAttributes">
-          <pre>{{ attribute.message }}</pre>
-        </div>
+        <md-list flex ng-hide="$ctrl.message">
+          <md-list-item class="md-3-line md-long-text" ng-repeat="attribute in state.unsuccessfulAttributes">
+            <img ng-src="{{$ctrl.attributeIcon(attribute)}}" class="md-avatar" />
+            <div class="md-list-item-text" layout="column">
+              <h3>{{ attribute.attributeName }} - {{ attribute.timestamp }}</h3>
+              <p>{{ attribute.message }}</p>
+            </div>
+          </md-list-item>
+        </md-list>
       </md-content>
     </md-card-content>
     <md-card-actions layout="row" layout-align="end center">

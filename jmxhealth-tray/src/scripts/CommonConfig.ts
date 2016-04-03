@@ -10,16 +10,16 @@ namespace jmxhealth {
     }
 
     export class HealthUtils {
-        public static stateIcon(state: api.StateResponse): string {
+        public static stateIcon(state: string): string {
             var icon = './icons/';
 
-            if (state.overallState === 'ALERT') {
+            if (state === 'ALERT') {
                 icon += 'error';
             }
-            else if (state.overallState === 'WARN') {
+            else if (state === 'WARN') {
                 icon += 'warning';
             }
-            else if (state.overallState === 'OK') {
+            else if (state === 'OK') {
                 icon += 'check';
             }
 

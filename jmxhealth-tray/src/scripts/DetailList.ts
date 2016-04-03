@@ -31,7 +31,11 @@ namespace jmxhealth {
         }
 
         public stateIcon(state: api.StateResponse): string {
-            return HealthUtils.stateIcon(state);
+            return HealthUtils.stateIcon(state.overallState);
+        }
+
+        public attributeIcon(attribute: api.AttributeState): string {
+            return HealthUtils.stateIcon(attribute.state);
         }
 
         public inFailedState(): boolean {

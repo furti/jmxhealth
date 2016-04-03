@@ -26,7 +26,7 @@ namespace jmxhealth {
         }
 
         public stateIcon(state: api.StateResponse): string {
-            return HealthUtils.stateIcon(state);
+            return HealthUtils.stateIcon(state.overallState);
         }
 
         private prepareStates(states: api.StateResponse[]): { [environment: string]: api.StateResponse[] } {
