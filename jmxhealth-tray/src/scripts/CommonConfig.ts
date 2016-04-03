@@ -12,7 +12,7 @@ namespace jmxhealth {
     export class HealthUtils {
         static SELF_KEYWOARD = 'jmxhealth.self';
 
-        public static stateIcon(state: string): string {
+        public static stateIconPath(state: string): string {
             var icon = './icons/';
 
             if (state === 'ALERT') {
@@ -26,6 +26,30 @@ namespace jmxhealth {
             }
 
             return icon + '.png';
+        }
+
+        public static stateIcon(state: string): string {
+            if (state === 'ALERT') {
+                return 'error';
+            }
+            else if (state === 'WARN') {
+                return 'warning';
+            }
+            else if (state === 'OK') {
+                return 'check_circle';
+            }
+        }
+
+        public static stateIconClass(state: string): string {
+            if (state === 'ALERT') {
+                return 'alert';
+            }
+            else if (state === 'WARN') {
+                return 'warn';
+            }
+            else if (state === 'OK') {
+                return 'success';
+            }
         }
     }
 

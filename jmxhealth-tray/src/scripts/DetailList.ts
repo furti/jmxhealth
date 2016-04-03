@@ -12,7 +12,11 @@ namespace jmxhealth {
         constructor($scope: angular.IScope) {
             pubsub.subscribe(topic.FAILED_STATES, (message, failed) => {
                 this.failedStates = failed;
-                this.show();
+
+                if (this.shouldShow()) {
+                    this.show();
+                }
+
                 $scope.$apply();
             });
 
@@ -28,12 +32,26 @@ namespace jmxhealth {
             currentWindow.focus();
         }
 
+        public shouldShow(): boolean {
+            if (!this.failedStates || this.failedStates.length === 0) {
+                return false;
+            }
+
+            //TODO: we have to check if a failed application is paused. -> don't popup in that case
+
+            return true;
+        }
+
         public stateIcon(state: api.StateResponse): string {
             return HealthUtils.stateIcon(state.overallState);
         }
 
+        public stateIconClass(state: api.StateResponse): string {
+            return HealthUtils.stateIconClass(state.overallState);
+        }
+
         public attributeIcon(attribute: api.AttributeState): string {
-            return HealthUtils.stateIcon(attribute.state);
+            return HealthUtils.stateIconPath(attribute.state);
         }
 
         public inFailedState(): boolean {

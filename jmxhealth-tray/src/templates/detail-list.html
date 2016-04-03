@@ -1,5 +1,6 @@
-<p ng-hide="$ctrl.inFailedState()">
-  <img src="./icons/check.png" /> Awesome. Everything is running fine!
+<p ng-hide="$ctrl.inFailedState()" layout="column" layout-align="center center">
+  <md-icon class="success">check_circle</md-icon>
+  <span>Awesome. Everything is running fine!</span>
 </p>
 
 <div flex layout="column" ng-show="$ctrl.inFailedState()">
@@ -11,7 +12,7 @@
       </md-card-title-text>
       <md-card-title-media>
         <div class="md-media-sm card-media">
-          <img ng-src="{{$ctrl.stateIcon(state)}}" class="md-avatar" />
+          <md-icon ng-class="$ctrl.stateIconClass(state)">{{$ctrl.stateIcon(state)}}</md-icon>
         </div>
       </md-card-title-media>
     </md-card-title>

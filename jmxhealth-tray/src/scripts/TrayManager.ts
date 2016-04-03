@@ -24,19 +24,7 @@ namespace jmxhealth {
             this.tray.on('click', () => this.showPopup());
 
             pubsub.subscribe(topic.OVERALL_STATE, (msg, data) => {
-                var icon;
-
-                if (data === 'ALERT') {
-                    icon = 'icons/error.png';
-                }
-                else if (data === 'WARN') {
-                    icon = 'icons/warning.png';
-                }
-                else if (data === 'OK') {
-                    icon = 'icons/network_check.png';
-                }
-
-                this.tray.icon = icon;
+                this.tray.icon = HealthUtils.stateIconPath(data);
             });
 
             pubsub.subscribe(topic.NO_SERVERS, () => {

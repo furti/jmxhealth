@@ -5,3 +5,21 @@
 .break-all {
   word-break: break-all;
 }
+.success {
+  color: #0D4A0F;
+}
+.warn {
+  color: #838431;
+}
+.alert {
+  color: #9D1414;
+}
+md-list-item > md-icon:first-child:not(.md-avatar-icon), md-list-item .md-list-item-inner > md-icon:first-child:not(.md-avatar-icon) {
+  font-size: 38px;
+  width: 38px;
+}
+.material-icons {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+}

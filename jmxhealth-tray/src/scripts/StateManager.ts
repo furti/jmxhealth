@@ -2,7 +2,7 @@ namespace jmxhealth {
     var pubsub = require('pubsub-js'),
         stateManager: StateManager,
         config: TrayConfig = require('./config.json'),
-        pollTimeInSeconds = 10,
+        pollTimeInSeconds = 30,
         stateWeight = {
             'ALERT': 30,
             'WARN': 20,
