@@ -11,9 +11,11 @@ namespace jmxhealth {
 
         constructor($scope: angular.IScope) {
             pubsub.subscribe(topic.FAILED_STATES, (message, failed) => {
-                this.failedStates = failed;
-                this.show();
-                $scope.$apply();
+                if (!this.failedStates) {
+                    this.failedStates = failed;
+                    this.show();
+                    $scope.$apply();
+                }
             });
 
             pubsub.subscribe(topic.SHOW_DETAIL, (message, state) => {
@@ -26,6 +28,18 @@ namespace jmxhealth {
         public show(): void {
             currentWindow.show();
             currentWindow.focus();
+        }
+
+        public stateIcon(state: api.StateResponse): string {
+            return HealthUtils.stateIcon(state);
+        }
+
+        public inFailedState(): boolean {
+            if (!this.failedStates || this.failedStates.length === 0) {
+                return false;
+            }
+
+            return true;
         }
     }
 

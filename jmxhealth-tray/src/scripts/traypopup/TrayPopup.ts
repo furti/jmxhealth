@@ -26,19 +26,7 @@ namespace jmxhealth {
         }
 
         public stateIcon(state: api.StateResponse): string {
-            var icon = './icons/';
-
-            if (state.overallState === 'ALERT') {
-                icon += 'error';
-            }
-            else if (state.overallState === 'WARN') {
-                icon += 'warning';
-            }
-            else if (state.overallState === 'OK') {
-                icon += 'check';
-            }
-
-            return icon + '.png';
+            return HealthUtils.stateIcon(state);
         }
 
         private prepareStates(states: api.StateResponse[]): { [environment: string]: api.StateResponse[] } {

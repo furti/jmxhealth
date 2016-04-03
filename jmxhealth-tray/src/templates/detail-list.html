@@ -1,2 +1,30 @@
-<pre>{{$ctrl.filterState | json}}</pre>
-<pre>{{$ctrl.failedStates | json}}</pre>
+<p ng-hide="$ctrl.inFailedState()">
+  <img src="./icons/check.png" /> Awesome. Everything is running fine!
+</p>
+
+<div flex layout="column" ng-show="$ctrl.inFailedState()">
+  <md-card ng-repeat="state in $ctrl.failedStates">
+    <md-card-title>
+      <md-card-title-text>
+        <span class="md-headline">{{ state.application }}</span>
+        <span class="md-subhead">{{ state.environment }}</span>
+      </md-card-title-text>
+      <md-card-title-media>
+        <div class="md-media-sm card-media">
+          <img ng-src="{{$ctrl.stateIcon(state)}}" class="md-avatar" />
+        </div>
+      </md-card-title-media>
+    </md-card-title>
+    <md-card-content>
+      <md-content>
+        <div ng-repeat="attribute in state.unsuccessfulAttributes">
+          <pre>{{ attribute.message }}</pre>
+        </div>
+      </md-content>
+    </md-card-content>
+    <md-card-actions layout="row" layout-align="end center">
+      <md-button>Pause</md-button>
+      <md-button>Resume</md-button>
+    </md-card-actions>
+  </md-card>
+</div>

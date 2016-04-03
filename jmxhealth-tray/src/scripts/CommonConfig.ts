@@ -9,6 +9,24 @@ namespace jmxhealth {
         export const SHOW_DETAIL = 'jmxhealth.showdetail';
     }
 
+    export class HealthUtils {
+        public static stateIcon(state: api.StateResponse): string {
+            var icon = './icons/';
+
+            if (state.overallState === 'ALERT') {
+                icon += 'error';
+            }
+            else if (state.overallState === 'WARN') {
+                icon += 'warning';
+            }
+            else if (state.overallState === 'OK') {
+                icon += 'check';
+            }
+
+            return icon + '.png';
+        }
+    }
+
     angular.module('jmxhealth.common', ['ngMaterial'])
         .config(['$mdThemingProvider', '$compileProvider', function($mdThemingProvider, $compileProvider: angular.ICompileProvider) {
             $mdThemingProvider.theme('default');

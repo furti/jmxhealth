@@ -64,10 +64,7 @@ namespace jmxhealth {
 
                 var filterResult = this.filterFailedStates(allStates);
 
-                if (filterResult.overallState !== 'OK') {
-                    pubsub.publish(topic.FAILED_STATES, filterResult.failedStates);
-                }
-
+                pubsub.publish(topic.FAILED_STATES, filterResult.failedStates);
                 pubsub.publish(topic.STATES, allStates);
                 pubsub.publish(topic.OVERALL_STATE, filterResult.overallState);
             });
