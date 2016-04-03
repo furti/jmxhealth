@@ -10,6 +10,7 @@ declare namespace jmxhealth.api {
         environment: string;
         overallState: string;
         unsuccessfulAttributes?: AttributeState[];
+        paused?: boolean;
     }
 
     interface AttributeState {

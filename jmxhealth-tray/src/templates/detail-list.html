@@ -5,17 +5,15 @@
 
 <div flex layout="column" ng-show="$ctrl.inFailedState()">
   <md-card ng-repeat="state in $ctrl.failedStates">
-    <md-card-title>
-      <md-card-title-text>
+    <md-card-header>
+      <md-card-header-text>
         <span class="md-headline">{{ state.application }}</span>
         <span class="md-subhead">{{ state.environment }}</span>
-      </md-card-title-text>
-      <md-card-title-media>
-        <div class="md-media-sm card-media">
-          <md-icon ng-class="$ctrl.stateIconClass(state)">{{$ctrl.stateIcon(state)}}</md-icon>
-        </div>
-      </md-card-title-media>
-    </md-card-title>
+      </md-card-header-text>
+      <md-card-avatar>
+        <md-icon ng-class="[$ctrl.stateIconClass(state)]">{{$ctrl.stateIcon(state)}}</md-icon>
+      </md-card-avatar>
+    </md-card-header>
     <md-card-content>
       <md-content>
         <md-list flex ng-hide="$ctrl.message">
@@ -30,8 +28,12 @@
       </md-content>
     </md-card-content>
     <md-card-actions layout="row" layout-align="end center">
-      <md-button>Pause</md-button>
-      <md-button>Resume</md-button>
+      <md-button ng-hide="state.paused" ng-click="$ctrl.pauseState(state)">
+        <md-icon>pause</md-icon> Pause Notification Popup
+      </md-button>
+      <md-button ng-show="state.paused" ng-click="$ctrl.resumeState(state)">
+        <md-icon>play_arrow</md-icon> Resume Notification Popup
+      </md-button>
     </md-card-actions>
   </md-card>
 </div>

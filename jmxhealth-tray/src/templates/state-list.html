@@ -11,6 +11,7 @@
       <div class="md-list-item-text" layout="column">
         <h3>{{ state.application }}</h3>
         <p>{{ state.environment }}</p>
+        <md-icon ng-click="$ctrl.togglePauseState(state)" class="md-secondary">{{$ctrl.pauseIcon(state)}}</md-icon>
       </div>
     </md-list-item>
   </md-list>

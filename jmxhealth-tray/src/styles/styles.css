@@ -18,8 +18,6 @@ md-list-item > md-icon:first-child:not(.md-avatar-icon), md-list-item .md-list-i
   font-size: 38px;
   width: 38px;
 }
-.material-icons {
-  font-size: 48px;
-  height: 48px;
-  width: 48px;
+.icon-80 {
+  font-size: 80px;
 }

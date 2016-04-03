@@ -25,6 +25,14 @@ namespace jmxhealth {
                 $scope.$apply();
                 this.show();
             });
+
+            pubsub.subscribe(topic.PAUSE, () => {
+                $scope.$apply();
+            });
+
+            pubsub.subscribe(topic.RESUME, () => {
+                $scope.$apply();
+            });
         }
 
         public show(): void {
@@ -37,9 +45,25 @@ namespace jmxhealth {
                 return false;
             }
 
-            //TODO: we have to check if a failed application is paused. -> don't popup in that case
+            for (let state of this.failedStates) {
+                if (!state.paused) {
+                    return true;
+                }
+            }
 
-            return true;
+            return false;
+        }
+
+        public pauseState(state: api.StateResponse): void {
+            state.paused = true;
+
+            pubsub.publish(topic.PAUSE, state);
+        }
+
+        public resumeState(state: api.StateResponse): void {
+            state.paused = false;
+
+            pubsub.publish(topic.RESUME, state);
         }
 
         public stateIcon(state: api.StateResponse): string {

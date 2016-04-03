@@ -1,5 +1,5 @@
 namespace jmxhealth {
-    var pubsub = require('pubsub-js'),
+    var pubsub: pubsub.PubSub = require('pubsub-js'),
         stateManager: StateManager,
         config: TrayConfig = require('./config.json'),
         pollTimeInSeconds = 30,
@@ -11,9 +11,27 @@ namespace jmxhealth {
 
     class StateManager {
         private requests: StateRequest[];
+        private pausedStates: PausedApplication[];
 
         constructor(private $http: angular.IHttpService, private $interval: angular.IIntervalService, private $q: angular.IQService) {
+            this.pausedStates = [];
 
+            pubsub.subscribe(topic.PAUSE, (message: string, state: api.StateResponse) => {
+                this.pausedStates.push({
+                    application: state.application,
+                    environment: state.environment
+                });
+            });
+
+            pubsub.subscribe(topic.RESUME, (message: string, state: api.StateResponse) => {
+                this.pausedStates = this.pausedStates.filter((pausedState) => {
+                    if (pausedState.application === state.application && pausedState.environment === state.environment) {
+                        return false;
+                    }
+
+                    return true;
+                });
+            });
         }
 
         public start(): void {
@@ -71,7 +89,7 @@ namespace jmxhealth {
                     allStates = allStates.concat(state);
                 });
 
-                var filterResult = this.filterFailedStates(allStates);
+                var filterResult = this.prepareStates(allStates);
 
                 pubsub.publish(topic.FAILED_STATES, filterResult.failedStates);
                 pubsub.publish(topic.STATES, allStates);
@@ -88,7 +106,7 @@ namespace jmxhealth {
             }
         }
 
-        private filterFailedStates(states: api.StateResponse[]): FailedStateFilter {
+        private prepareStates(states: api.StateResponse[]): FailedStateFilter {
             var filterResult: FailedStateFilter = {
                 overallState: null,
                 failedStates: []
@@ -101,6 +119,17 @@ namespace jmxhealth {
 
                 if (state.overallState !== 'OK') {
                     filterResult.failedStates.push(state);
+                }
+
+                //If the application is paused --> set the state to paused
+                if (this.pausedStates.filter((pausedState) => {
+                    if (state.application === pausedState.application && state.environment === pausedState.environment) {
+                        return true;
+                    }
+
+                    return false;
+                }).length > 0) {
+                    state.paused = true;
                 }
             }
 
@@ -141,6 +170,11 @@ namespace jmxhealth {
     interface FailedStateFilter {
         overallState: string;
         failedStates: api.StateResponse[];
+    }
+
+    interface PausedApplication {
+        application: string;
+        environment: string;
     }
 
     angular.module('jmxhealth.state', [])

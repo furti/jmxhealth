@@ -1,5 +1,5 @@
 namespace jmxhealth {
-    var pubsub = require('pubsub-js');
+    var pubsub: pubsub.PubSub = require('pubsub-js');
 
     class StateListController {
         public statesByEnvironment: { [environment: string]: api.StateResponse[] };
@@ -19,6 +19,14 @@ namespace jmxhealth {
                 this.statesByEnvironment = this.prepareStates(states);
                 $scope.$apply();
             });
+
+            pubsub.subscribe(topic.PAUSE, () => {
+                $scope.$apply();
+            });
+
+            pubsub.subscribe(topic.RESUME, () => {
+                $scope.$apply();
+            });
         }
 
         public showDetail(state: api.StateResponse): void {
@@ -31,6 +39,29 @@ namespace jmxhealth {
 
         public stateIconClass(state: api.StateResponse): string {
             return HealthUtils.stateIconClass(state.overallState);
+        }
+
+        public togglePauseState(state: api.StateResponse): void {
+            if (state.paused) {
+                state.paused = false;
+
+                pubsub.publish(topic.RESUME, state);
+            }
+            else {
+                state.paused = true;
+
+                pubsub.publish(topic.PAUSE, state);
+            }
+
+        }
+
+        public pauseIcon(state: api.StateResponse): string {
+            if (state.paused) {
+                return 'play_arrow';
+            }
+            else {
+                return 'pause';
+            }
         }
 
         private prepareStates(states: api.StateResponse[]): { [environment: string]: api.StateResponse[] } {

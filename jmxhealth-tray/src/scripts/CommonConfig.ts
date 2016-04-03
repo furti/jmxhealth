@@ -7,6 +7,8 @@ namespace jmxhealth {
         export const START = 'jmxhealth.start';
         export const INITIALIZED = 'jmxhealth.initialized';
         export const SHOW_DETAIL = 'jmxhealth.showdetail';
+        export const PAUSE = 'jmxhealth.pausestate';
+        export const RESUME = 'jmxhealth.resumestate';
     }
 
     export class HealthUtils {
