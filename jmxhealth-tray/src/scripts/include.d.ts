@@ -18,6 +18,11 @@ declare namespace jmxhealth.api {
         message: string;
         timestamp: string;
     }
+
+    interface ApplicationFilter {
+        application: string;
+        environment: string;
+    }
 }
 
 declare namespace pubsub {

@@ -1,6 +1,10 @@
 {
   "servers": [{
     "name": "local",
-    "url": "http://localhost:8080"
+    "url": "http://localhost:8080",
+    "applications": [{
+      "application": "important-app",
+      "environment": "PROD"
+    }]
   }]
 }

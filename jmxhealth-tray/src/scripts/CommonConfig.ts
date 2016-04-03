@@ -10,6 +10,8 @@ namespace jmxhealth {
     }
 
     export class HealthUtils {
+        static SELF_KEYWOARD = 'jmxhealth.self';
+
         public static stateIcon(state: string): string {
             var icon = './icons/';
 

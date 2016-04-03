@@ -6,5 +6,6 @@ namespace jmxhealth {
     export interface Server {
         name: string;
         url: string;
+        applications: api.ApplicationFilter[];
     }
 }

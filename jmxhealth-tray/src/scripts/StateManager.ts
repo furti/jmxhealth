@@ -33,11 +33,20 @@ namespace jmxhealth {
             var responses: angular.IPromise<api.StateResponse[]>[] = [];
 
             this.requests.forEach((request) => {
-                responses.push(this.$http.get(request.serverUrl, {
-                    data: null
-                }).then((stateResponse: api.StateResponse[]) => {
-                    //TODO: replace SELF with reuqest.serverName
-                    return stateResponse;
+                responses.push(this.$http({
+                    url: request.serverUrl,
+                    method: 'POST',
+                    data: request.filter
+                }).then((response: angular.IHttpPromiseCallbackArg<api.StateResponse[]>) => {
+                    if (response.data) {
+                        response.data.forEach((entry) => {
+                            if (entry.application === HealthUtils.SELF_KEYWOARD) {
+                                entry.application = request.serverName;
+                            }
+                        });
+                    }
+
+                    return response.data;
                 }, (error: any) => {
                     var errorState: api.StateResponse[] = [{
                         application: request.serverName,
@@ -102,10 +111,21 @@ namespace jmxhealth {
             var requests: StateRequest[] = [];
 
             config.servers.forEach((server) => {
-                requests.push({
-                    serverUrl: server.url,
-                    serverName: server.name
-                });
+                var request: StateRequest = {
+                    serverUrl: server.url + '/states',
+                    serverName: server.name,
+                    filter: server.applications
+                };
+
+                //Add self to the filters. We always want to know the state of the monitoring server itself.
+                if (request.filter) {
+                    request.filter.push({
+                        application: HealthUtils.SELF_KEYWOARD,
+                        environment: null
+                    });
+                }
+
+                requests.push(request);
             });
 
             return requests;
@@ -115,6 +135,7 @@ namespace jmxhealth {
     interface StateRequest {
         serverName: string;
         serverUrl: string;
+        filter: api.ApplicationFilter[];
     }
 
     interface FailedStateFilter {
