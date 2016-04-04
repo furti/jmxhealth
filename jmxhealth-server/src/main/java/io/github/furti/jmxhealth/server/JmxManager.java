@@ -1,6 +1,7 @@
 package io.github.furti.jmxhealth.server;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.management.MBeanServerConnection;
+import javax.annotation.PreDestroy;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -61,10 +62,30 @@ public class JmxManager {
 			return;
 		}
 
-		for (RemoteConnection connection : this.connections) {
+		Iterator<RemoteConnection> it = this.connections.iterator();
+
+		while (it.hasNext()) {
+			RemoteConnection connection = it.next();
+
 			try {
 				this.stateManager.remoteState(connection.getServerConfig(), connection.poll());
 			} catch (Exception ex) {
+				/*
+				 * Something went wrong while communicating with the server
+				 * Maybe the connection is closed. So close it and reconnect
+				 * later.
+				 */
+				if (ex instanceof IOException) {
+					connection.close();
+					it.remove();
+
+					if (failedConnections == null) {
+						failedConnections = new ArrayList<>();
+					}
+
+					this.failedConnections.add(connection.getServerConfig());
+				}
+
 				LOG.error("Error polling " + connection.getServerConfig(), ex);
 				this.stateManager.remoteState(connection.getServerConfig(),
 						Arrays.asList(new AttributeState("POLL", HealthState.ALERT,
@@ -86,6 +107,15 @@ public class JmxManager {
 		} catch (Exception ex) {
 			LOG.error("Error setting up JMX Connections", ex);
 			this.stateManager.failed("ServerState", "Error setting up JMX Connections", ex);
+		}
+	}
+
+	@PreDestroy
+	public void close() {
+		if (this.connections != null) {
+			for (RemoteConnection connection : this.connections) {
+				connection.close();
+			}
 		}
 	}
 
@@ -158,9 +188,8 @@ public class JmxManager {
 				"service:jmx:rmi:///jndi/rmi://" + server.getHost() + ":" + server.getPort() + "/jmxrmi");
 
 		JMXConnector connector = JMXConnectorFactory.connect(url, buildEnv(server));
-		MBeanServerConnection connection = connector.getMBeanServerConnection();
 
-		return new RemoteConnection(connection, connector, server);
+		return new RemoteConnection(connector, server);
 	}
 
 	private Map<String, ?> buildEnv(RemoteServer server) throws Exception {

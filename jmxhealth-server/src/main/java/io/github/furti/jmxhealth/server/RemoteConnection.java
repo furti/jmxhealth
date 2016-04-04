@@ -2,6 +2,7 @@ package io.github.furti.jmxhealth.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -22,19 +23,17 @@ import io.github.furti.jmxhealth.server.config.Watcher;
 import io.github.furti.jmxhealth.server.validation.ValidationResult;
 
 public class RemoteConnection {
-	private MBeanServerConnection connection;
 	private JMXConnector connector;
 	private RemoteServer serverConfig;
 
-	public RemoteConnection(MBeanServerConnection connection, JMXConnector connector, RemoteServer serverConfig) {
+	public RemoteConnection(JMXConnector connector, RemoteServer serverConfig) {
 		super();
-		this.connection = connection;
 		this.connector = connector;
 		this.serverConfig = serverConfig;
 	}
 
-	public MBeanServerConnection getConnection() {
-		return connection;
+	public MBeanServerConnection getConnection() throws IOException {
+		return connector.getMBeanServerConnection();
 	}
 
 	public JMXConnector getConnector() {
@@ -64,7 +63,7 @@ public class RemoteConnection {
 
 		for (Attribute mBeanAttribute : mBeanAttributes.asList()) {
 			WatchedAttribute watchedAttribute = watchedAttributes.get(mBeanAttribute.getName());
-			
+
 			try {
 
 				ValidationResult validationresult = watchedAttribute.getType().validate(mBeanAttribute.getValue(),
@@ -85,10 +84,31 @@ public class RemoteConnection {
 			throws InstanceNotFoundException, ReflectionException, IOException, MalformedObjectNameException {
 		ObjectName objectName = new ObjectName(beanName);
 
-		return connection.getAttributes(objectName, attributeNames);
+		AttributeList attributes = getConnection().getAttributes(objectName, attributeNames);
+
+		// Validate the attributes
+		List<String> missing = new ArrayList<String>(Arrays.asList(attributeNames));
+		for (Attribute a : attributes.asList()) {
+			missing.remove(a.getName());
+		}
+
+		if (!missing.isEmpty()) {
+			throw new RuntimeException(
+					"Not all attributes where recieved for bean " + beanName + ". Missing attributes " + missing);
+		}
+
+		return attributes;
 	}
 
 	private String[] getAttributeNames(Map<String, WatchedAttribute> attributes) {
 		return attributes.keySet().toArray(new String[attributes.keySet().size()]);
+	}
+
+	public void close() {
+		try {
+			connector.close();
+		} catch (Exception ex) {
+			// Nothing to do here for now
+		}
 	}
 }
