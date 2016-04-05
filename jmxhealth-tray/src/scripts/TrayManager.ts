@@ -11,6 +11,7 @@ namespace jmxhealth {
         private tray: any;
         private popup: any;
         private popupShown: boolean;
+        private creditsPopup: any;
 
         constructor() {
 
@@ -55,16 +56,30 @@ namespace jmxhealth {
 
         private setupContextMenu(): void {
             var menu = new gui.Menu();
+
+            var creditsItem = new gui.MenuItem({ type: 'normal', label: 'Credits' });
+            creditsItem.on('click', () => this.showCredits());
+            menu.append(creditsItem);
+
             var closeItem = new gui.MenuItem({ type: 'normal', label: 'Close' });
             closeItem.on('click', () => this.close());
-
             menu.append(closeItem);
+
             this.tray.menu = menu;
         }
 
         private close(): void {
             this.popup.close(true);
             currentWindow.close(true);
+        }
+
+        private showCredits(): void {
+            gui.Window.open('./credits.html', {
+                frame: true,
+                resizable: false,
+                width: 300,
+                height: 300
+            });
         }
 
         private initPopupWindow(): void {
