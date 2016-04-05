@@ -1,10 +1,10 @@
 package io.github.furti.jmxhealth.server.config;
 
-import java.util.Map;
+import java.util.List;
 
 public class Watcher {
 	private String beanName;
-	private Map<String, WatchedAttribute> attributes;
+	private List<Check> checks;
 
 	public String getBeanName() {
 		return beanName;
@@ -14,16 +14,17 @@ public class Watcher {
 		this.beanName = beanName;
 	}
 
-	public Map<String, WatchedAttribute> getAttributes() {
-		return attributes;
+	public List<Check> getChecks() {
+		return checks;
 	}
 
-	public void setAttributes(Map<String, WatchedAttribute> attributes) {
-		this.attributes = attributes;
+	public void setChecks(List<Check> checks) {
+		this.checks = checks;
 	}
 
 	@Override
 	public String toString() {
 		return "Watcher [beanName=" + beanName + "]";
 	}
+
 }

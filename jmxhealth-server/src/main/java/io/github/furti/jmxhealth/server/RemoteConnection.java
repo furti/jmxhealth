@@ -3,6 +3,8 @@ package io.github.furti.jmxhealth.server;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,8 +19,8 @@ import javax.management.remote.JMXConnector;
 
 import io.github.furti.jmxhealth.AttributeState;
 import io.github.furti.jmxhealth.HealthState;
+import io.github.furti.jmxhealth.server.config.Check;
 import io.github.furti.jmxhealth.server.config.RemoteServer;
-import io.github.furti.jmxhealth.server.config.WatchedAttribute;
 import io.github.furti.jmxhealth.server.config.Watcher;
 import io.github.furti.jmxhealth.server.validation.ValidationResult;
 
@@ -48,31 +50,80 @@ public class RemoteConnection {
 		List<AttributeState> result = new ArrayList<>();
 
 		for (Watcher watcher : this.serverConfig.getWatchers()) {
-			AttributeList mBeanAttributes = this.getMBeanAttributes(watcher.getBeanName(),
-					this.getAttributeNames(watcher.getAttributes()));
+			CheckGroup group = this.groupChecks(watcher);
 
-			result.addAll(this.validateAttributes(mBeanAttributes, watcher.getAttributes()));
+			AttributeList mBeanAttributes = null;
+
+			if (!group.getAllAttributes().isEmpty()) {
+				mBeanAttributes = this.getMBeanAttributes(watcher.getBeanName(),
+						this.getAttributeNames(group.getAllAttributes()));
+			}
+
+			List<PreparedCheck> checks = this.prepareChecks(group, mBeanAttributes);
+
+			result.addAll(this.validateAttributes(checks));
 		}
 
 		return result;
 	}
 
-	private List<AttributeState> validateAttributes(AttributeList mBeanAttributes,
-			Map<String, WatchedAttribute> watchedAttributes) throws Exception {
+	private List<PreparedCheck> prepareChecks(CheckGroup group, AttributeList mBeanAttributes) {
+		List<PreparedCheck> checks = new ArrayList<>();
+
+		if (!group.getSelfValidations().isEmpty()) {
+			for (Check check : group.getSelfValidations()) {
+				checks.add(
+						new PreparedCheck(
+								HealthUtils.attributesToMap(mBeanAttributes,
+										check.getType().getRequiredAttributeNames(check.getValidationConfig())),
+						check));
+			}
+		}
+
+		if (!group.getAttributeValidations().isEmpty()) {
+			for (Attribute mBeanAttribute : mBeanAttributes.asList()) {
+				checks.add(new PreparedCheck(mBeanAttribute.getValue(),
+						group.getAttributeValidations().get(mBeanAttribute.getName())));
+			}
+		}
+
+		return checks;
+	}
+
+	private CheckGroup groupChecks(Watcher watcher) {
+		if (watcher.getChecks() == null) {
+			return new CheckGroup();
+		}
+
+		CheckGroup group = new CheckGroup();
+
+		for (Check check : watcher.getChecks()) {
+			if (check.getAttributeName() != null) {
+				group.getAllAttributes().add(check.getAttributeName());
+				group.getAttributeValidations().put(check.getAttributeName(), check);
+			} else {
+				group.getSelfValidations().add(check);
+				group.getAllAttributes().addAll(check.getType().getRequiredAttributeNames(check.getValidationConfig()));
+			}
+		}
+
+		return group;
+	}
+
+	private List<AttributeState> validateAttributes(List<PreparedCheck> checks) throws Exception {
 		List<AttributeState> result = new ArrayList<>();
 
-		for (Attribute mBeanAttribute : mBeanAttributes.asList()) {
-			WatchedAttribute watchedAttribute = watchedAttributes.get(mBeanAttribute.getName());
+		for (PreparedCheck preparedCheck : checks) {
+			Check check = preparedCheck.getCheck();
 
 			try {
+				ValidationResult validationresult = check.getType().validate(preparedCheck.getBeanToValidate(),
+						check.getValidationConfig());
 
-				ValidationResult validationresult = watchedAttribute.getType().validate(mBeanAttribute.getValue(),
-						watchedAttribute.getValidationConfig());
-
-				result.add(new AttributeState(watchedAttribute.getDisplayName(), validationresult.getState(),
+				result.add(new AttributeState(check.getDisplayName(), validationresult.getState(),
 						validationresult.getMessage()));
 			} catch (Exception ex) {
-				result.add(new AttributeState(watchedAttribute.getDisplayName(), HealthState.ALERT,
+				result.add(new AttributeState(check.getDisplayName(), HealthState.ALERT,
 						HealthUtils.createMessageWithStacktrace("Error validating attribute", ex)));
 			}
 		}
@@ -100,8 +151,8 @@ public class RemoteConnection {
 		return attributes;
 	}
 
-	private String[] getAttributeNames(Map<String, WatchedAttribute> attributes) {
-		return attributes.keySet().toArray(new String[attributes.keySet().size()]);
+	private String[] getAttributeNames(Collection<String> attributes) {
+		return attributes.toArray(new String[attributes.size()]);
 	}
 
 	public void close() {
@@ -109,6 +160,49 @@ public class RemoteConnection {
 			connector.close();
 		} catch (Exception ex) {
 			// Nothing to do here for now
+		}
+	}
+
+	private static class PreparedCheck {
+		private Object beanToValidate;
+		private Check check;
+
+		public PreparedCheck(Object beanToValidate, Check check) {
+			super();
+			this.beanToValidate = beanToValidate;
+			this.check = check;
+		}
+
+		public Object getBeanToValidate() {
+			return beanToValidate;
+		}
+
+		public Check getCheck() {
+			return check;
+		}
+	}
+
+	private static class CheckGroup {
+		private List<String> allAttributes;
+		private Map<String, Check> attributeValidations;
+		private List<Check> selfValidations;
+
+		public CheckGroup() {
+			this.attributeValidations = new HashMap<>();
+			this.selfValidations = new ArrayList<>();
+			this.allAttributes = new ArrayList<>();
+		}
+
+		public List<String> getAllAttributes() {
+			return allAttributes;
+		}
+
+		public Map<String, Check> getAttributeValidations() {
+			return attributeValidations;
+		}
+
+		public List<Check> getSelfValidations() {
+			return selfValidations;
 		}
 	}
 }

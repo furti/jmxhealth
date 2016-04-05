@@ -1,5 +1,7 @@
 package io.github.furti.jmxhealth.server.validation;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.util.ObjectUtils;
@@ -22,5 +24,10 @@ public class EqualsValidator implements AttributeValidator {
 
 	private String buildMessage(Object attributeValue, String expectedValue) {
 		return "Actual value " + attributeValue + " and expected value " + expectedValue + " do not match";
+	}
+
+	@Override
+	public Collection<String> getRequiredAttributeNames(Map<String, Object> validationConfig) {
+		return Arrays.asList((String) validationConfig.get(VALUE_KEY));
 	}
 }

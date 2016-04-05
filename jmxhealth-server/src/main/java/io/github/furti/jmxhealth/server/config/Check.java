@@ -4,8 +4,15 @@ import java.util.Map;
 
 import io.github.furti.jmxhealth.server.ValidationType;
 
-public class WatchedAttribute {
+public class Check {
 	private String displayName;
+
+	/**
+	 * Optional name of an attribute to validate. If not set the bean itself
+	 * will be validated.
+	 */
+	private String attributeName;
+
 	private ValidationType type;
 	private Map<String, Object> validationConfig;
 
@@ -43,8 +50,16 @@ public class WatchedAttribute {
 		this.displayName = displayName;
 	}
 
+	public String getAttributeName() {
+		return attributeName;
+	}
+
+	public void setAttributeName(String attributeName) {
+		this.attributeName = attributeName;
+	}
+
 	@Override
 	public String toString() {
-		return "WatchedAttribute [displayName=" + displayName + "]";
+		return "Check [displayName=" + displayName + "]";
 	}
 }

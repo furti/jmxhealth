@@ -45,4 +45,15 @@ public class TestWebappController {
 
 		return "DONE";
 	}
+
+	@RequestMapping(value = "block/{number}")
+	public String blockForAMinute() {
+		try {
+			Thread.sleep(60 * 1000);
+		} catch (InterruptedException e) {
+			// Left blank
+		}
+
+		return "DONE";
+	}
 }

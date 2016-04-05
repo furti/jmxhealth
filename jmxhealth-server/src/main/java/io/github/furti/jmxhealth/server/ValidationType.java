@@ -1,5 +1,6 @@
 package io.github.furti.jmxhealth.server;
 
+import java.util.Collection;
 import java.util.Map;
 
 import io.github.furti.jmxhealth.server.validation.AttributeValidator;
@@ -18,5 +19,9 @@ public enum ValidationType {
 
 	public ValidationResult validate(Object attributeValue, Map<String, Object> validationConfig) throws Exception {
 		return validator.validate(attributeValue, validationConfig);
+	}
+
+	public Collection<String> getRequiredAttributeNames(Map<String, Object> validationConfig) {
+		return validator.getRequiredAttributeNames(validationConfig);
 	}
 }

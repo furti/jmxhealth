@@ -3,23 +3,6 @@ package io.github.furti.jmxhealth.server.config;
 import java.util.List;
 
 public class RemoteServer {
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
 	private String application;
 	private String environment;
 	private String host;
@@ -67,6 +50,22 @@ public class RemoteServer {
 
 	public void setPort(Integer port) {
 		this.port = port;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	@Override

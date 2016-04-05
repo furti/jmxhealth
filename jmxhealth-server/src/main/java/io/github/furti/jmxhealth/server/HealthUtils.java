@@ -4,11 +4,14 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.management.Attribute;
+import javax.management.AttributeList;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.TabularDataSupport;
 
@@ -105,5 +108,22 @@ public final class HealthUtils {
 		}
 
 		return path;
+	}
+
+	public static Map<String, Object> attributesToMap(AttributeList mBeanAttributes,
+			Collection<String> requiredAttributeNames) {
+		if (mBeanAttributes == null) {
+			return new HashMap<>();
+		}
+
+		Map<String, Object> map = new HashMap<>();
+
+		for (Attribute attribute : mBeanAttributes.asList()) {
+			if (requiredAttributeNames.contains(attribute.getName())) {
+				map.put(attribute.getName(), attribute.getValue());
+			}
+		}
+
+		return map;
 	}
 }

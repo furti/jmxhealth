@@ -1,5 +1,8 @@
 package io.github.furti.jmxhealth.server.validation;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import io.github.furti.jmxhealth.HealthState;
@@ -30,7 +33,16 @@ public class PercentageValidator implements AttributeValidator {
 	}
 
 	private String buildMessage(Number max, Number actual, float percentage) {
-		return "Percentage: " + percentage + ", Actual: " + (actual.floatValue() / 1024 / 1024) + "MB, Max: "
-				+ (max.floatValue() / 1024 / 1024) + "MB";
+		return "Percentage: " + percentage + ", Actual: " + actual.intValue() + ", Max: " + max.intValue();
+	}
+
+	@Override
+	public Collection<String> getRequiredAttributeNames(Map<String, Object> validationConfig) {
+		List<String> names = new ArrayList<>();
+
+		names.add((String) validationConfig.get(MAX_KEY));
+		names.add((String) validationConfig.get(ACTUAL_KEY));
+
+		return names;
 	}
 }
