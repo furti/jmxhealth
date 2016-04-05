@@ -10,6 +10,7 @@ namespace jmxhealth {
         private initialized: boolean = false;
         private tray: any;
         private popup: any;
+        private popupShown: boolean;
 
         constructor() {
 
@@ -21,7 +22,7 @@ namespace jmxhealth {
             }
 
             this.tray = new gui.Tray({ title: 'Jmxhealth', icon: 'icons/network_check.png' });
-            this.tray.on('click', () => this.showPopup());
+            this.tray.on('click', () => this.togglePopup());
 
             pubsub.subscribe(topic.OVERALL_STATE, (msg, data) => {
                 this.tray.icon = HealthUtils.stateIconPath(data);
@@ -35,14 +36,21 @@ namespace jmxhealth {
             this.initPopupWindow();
         }
 
-        private showPopup(): void {
+        private togglePopup(): void {
             if (!this.popup) {
                 return;
             }
 
-            this.popup.moveTo(window.screen.availWidth - popupWidth - 100, window.screen.availHeight - popupHeight - 50);
-            this.popup.show();
-            this.popup.focus();
+            if (this.popupShown) {
+                this.popupShown = false;
+                this.popup.hide();
+            }
+            else {
+                this.popup.moveTo(window.screen.availWidth - popupWidth - 100, window.screen.availHeight - popupHeight - 50);
+                this.popup.show();
+                this.popup.focus();
+                this.popupShown = true;
+            }
         }
 
         private setupContextMenu(): void {
@@ -69,11 +77,18 @@ namespace jmxhealth {
                 height: popupHeight
             };
 
+            this.popupShown = false;
+
             gui.Window.open('./tray-popup.html', params, (win) => {
                 this.popup = win;
                 this.popup.on('close', (event: any) => {
                     this.popup.hide();
+                    this.popupShown = false;
                 });
+
+                this.popup.on('minimize', () => {
+                    this.popupShown = false;
+                })
 
                 win.on('loaded', () => {
                     pubsub.publish(topic.INITIALIZED, 'TrayManager');

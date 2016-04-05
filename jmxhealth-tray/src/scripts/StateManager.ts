@@ -112,7 +112,7 @@ namespace jmxhealth {
                 failedStates: []
             };
 
-            for (let state of states) {
+            for (var state of states) {
                 if (!filterResult.overallState || stateWeight[state.overallState] > stateWeight[filterResult.overallState]) {
                     filterResult.overallState = state.overallState;
                 }
