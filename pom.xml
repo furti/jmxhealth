@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.furti.jmxhealth</groupId>
 	<artifactId>jmxhealth</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<packaging>pom</packaging>
 
 	<url>https://github.com/furti/jmxhealth</url>
@@ -23,6 +23,7 @@
 	<scm>
 		<connection>scm:git:https://github.com/furti/jmxhealth</connection>
 		<developerConnection>scm:git:https://github.com/furti/jmxhealth</developerConnection>
+		<tag>0.1.0</tag>
 	</scm>
 
 	<dependencyManagement>
@@ -69,6 +70,12 @@
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
 			</plugin>
 		</plugins>
 
