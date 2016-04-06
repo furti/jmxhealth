@@ -1,6 +1,6 @@
 {
   "name": "jmxhealth-tray",
-  "version": "0.0.1",
+  "version": "$1",
   "description": "System Tray application to watch jmxhealth monitored applications",
   "main": "index.html",
   "scripts": {
