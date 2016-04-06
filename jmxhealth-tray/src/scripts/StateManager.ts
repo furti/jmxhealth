@@ -69,6 +69,7 @@ namespace jmxhealth {
                     var errorState: api.StateResponse[] = [{
                         application: request.serverName,
                         environment: 'Monitoring Server',
+                        server: null,
                         overallState: 'ALERT',
                         unsuccessfulAttributes: [{
                             attributeName: 'Connection',

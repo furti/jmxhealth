@@ -8,6 +8,7 @@ declare namespace jmxhealth.api {
     interface StateResponse {
         application: string;
         environment: string;
+        server: string;
         overallState: string;
         unsuccessfulAttributes?: AttributeState[];
         paused?: boolean;

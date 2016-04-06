@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
@@ -84,7 +85,7 @@ public class StateManager {
 		this.removeRemoteState(remoteServer);
 
 		StateResponse stateResponse = HealthUtils.toStateResponse(remoteServer.getApplication(),
-				remoteServer.getEnvironment(), attributeStates);
+				remoteServer.getEnvironment(), remoteServer.getHost(), attributeStates);
 
 		if (stateResponse.getOverallState() != HealthState.OK) {
 			try {
@@ -101,14 +102,21 @@ public class StateManager {
 		remoteStates.add(stateResponse);
 	}
 
-	public StateResponse getRemoteState(String application, String environment) throws RemoteStateNotFoundException {
+	public Collection<StateResponse> getRemoteState(String application, String environment)
+			throws RemoteStateNotFoundException {
+		List<StateResponse> responses = new ArrayList<>();
+
 		for (StateResponse remoteState : this.remoteStates) {
 			if (remoteState.getApplication().equals(application) && remoteState.getEnvironment().equals(environment)) {
-				return remoteState;
+				responses.add(remoteState);
 			}
 		}
 
-		throw new RemoteStateNotFoundException(application, environment);
+		if (responses.isEmpty()) {
+			throw new RemoteStateNotFoundException(application, environment);
+		}
+
+		return responses;
 	}
 
 	private void removeRemoteState(RemoteServer toDelete) {

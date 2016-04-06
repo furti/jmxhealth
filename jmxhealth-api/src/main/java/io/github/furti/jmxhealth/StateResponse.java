@@ -6,20 +6,26 @@ public class StateResponse {
 
 	private String application;
 	private String environment;
+	private String server;
 	private HealthState overallState;
 	private List<AttributeState> unsuccessfulAttributes;
 
-	public StateResponse(String application, String environment, HealthState overallState) {
-		this(application, environment, overallState, null);
+	public StateResponse(String application, String environment, String server, HealthState overallState) {
+		this(application, environment, server, overallState, null);
 	}
 
-	public StateResponse(String application, String environment, HealthState overallState,
+	public StateResponse(String application, String environment, String server, HealthState overallState,
 			List<AttributeState> unsuccessfulAttributes) {
 		super();
 		this.overallState = overallState;
 		this.unsuccessfulAttributes = unsuccessfulAttributes;
 		this.application = application;
 		this.environment = environment;
+		this.server = server;
+	}
+
+	public String getServer() {
+		return server;
 	}
 
 	public HealthState getOverallState() {

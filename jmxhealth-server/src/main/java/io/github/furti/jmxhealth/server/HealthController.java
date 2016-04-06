@@ -34,14 +34,14 @@ public class HealthController {
 
 		filters.forEach((filter) -> {
 			if (filter.getApplication().equals(HealthUtils.SELF_KEYWOARD)) {
-				response.add(HealthUtils.toStateResponse(HealthUtils.SELF_KEYWOARD, "Monitoring",
+				response.add(HealthUtils.toStateResponse(HealthUtils.SELF_KEYWOARD, "Monitoring", null,
 						stateManager.getSelfState()));
 			} else {
 				try {
-					response.add(this.stateManager.getRemoteState(filter.getApplication(), filter.getEnvironment()));
+					response.addAll(this.stateManager.getRemoteState(filter.getApplication(), filter.getEnvironment()));
 				} catch (RemoteStateNotFoundException e) {
-					response.add(new StateResponse(filter.getApplication(), filter.getEnvironment(), HealthState.WARN,
-							Arrays.asList(new AttributeState("State", HealthState.WARN,
+					response.add(new StateResponse(filter.getApplication(), filter.getEnvironment(), null,
+							HealthState.WARN, Arrays.asList(new AttributeState("State", HealthState.WARN,
 									"The application could not be found. Maybe the application is not monitored or you provided the wrong filter data."))));
 				}
 			}
@@ -53,11 +53,11 @@ public class HealthController {
 	@RequestMapping(value = "/self", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public StateResponse selfState() {
 
-		return HealthUtils.toStateResponse(HealthUtils.SELF_KEYWOARD, null, stateManager.getSelfState());
+		return HealthUtils.toStateResponse(HealthUtils.SELF_KEYWOARD, "Monitoring", null, stateManager.getSelfState());
 	}
 
 	@RequestMapping(value = "/remotes/environment/{environment}/application/{application}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public StateResponse environmentAndApplicationState(@PathVariable("environment") String environment,
+	public Collection<StateResponse> environmentAndApplicationState(@PathVariable("environment") String environment,
 			@PathVariable("application") String application) throws RemoteStateNotFoundException {
 
 		return this.stateManager.getRemoteState(application, environment);
