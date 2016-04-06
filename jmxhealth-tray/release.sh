@@ -6,6 +6,8 @@ if [ -z "$1" ]
     exit -1
 fi
 
+sed -i 's/.*\"version\".*/  \"version\": \"$1\",/' package.json
+
 VERSION="jmxhealth-tray-$1"
 BASE_DIR="release/$VERSION"
 APP_DIR="$BASE_DIR/app"
