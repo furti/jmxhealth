@@ -8,5 +8,8 @@ cd jmxhealth-tray
 ./release.sh $1
 
 cd ..
+git add .
+git commit -m "Released Version $1"
+
 mvn package
 mvn release:prepare
