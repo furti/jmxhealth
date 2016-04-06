@@ -9,3 +9,4 @@ cd jmxhealth-tray
 
 cd ..
 mvn package
+mvn release:prepare
