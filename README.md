@@ -2,51 +2,15 @@
 Remote JMX Health Check
 
 ## Installation
-Download the jmxhealth-server.war and deploy it to a Servlet Container of your choice.
-*TODO: Make WAR available*
+You will need the jmxhealth-server to collect the health state of all applications you want to monitor.
+The server exports the informations via a RESTful API.
 
-Set the path to the directory jmxhealth-server should use either by setting the System Property or by adding a Parameter to the Servlet Context Configuration.
+See the [jmxhealth-server Documentation](./jmxhealth-server/README.md) for more details.
 
-#### System Property
-```
--Dio.github.furti.jmxhealth.data-location=path/to/data/folder
-```
 
-#### Servlet Context
-```xml
-<Context>
-  ...
-  <Parameter name="io.github.furti.jmxhealth.data-location" value="path/to/data/folder" override="false"/>
-  ...
-</Context>
-``` 
+In addition you will need a tool that checks the collected informations periodically and informs you about problems.
+Therefore jmxhealth offers a system tray application.
+See the [jmxhealth-tray Documentation](./jmxhealth-tray/README.md) for more details.
 
-*The data folder must contain a jmxhealth.json file that contains the Remote configuration.*
-
-## jmxhealth.json
-
-```javascript
-{
-  "servers": [{
-    "application": "important-app",
-    "environment": "PROD",
-    "host": "localhost",
-    "port": 9999,
-    "watchers": [{
-      "beanName": "java.lang:type=GarbageCollector,name=PS MarkSweep",
-      "attributes": {
-        "LastGcInfo": {
-          "displayName": "Heap Memory Usage After GC",
-          "type": "PERCENTAGE",
-          "validationConfig": {
-            "max": "memoryUsageAfterGc.PS Old Gen.max",
-            "actual": "memoryUsageAfterGc.PS Old Gen.used",
-            "warnOn": 50,
-            "alertOn": 70
-          }
-        }
-      }
-    }]
-  }]
-}
-```
+## Downloads
+All available Releases can be found [here](https://github.com/furti/jmxhealth/releases).
