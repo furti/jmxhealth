@@ -7,7 +7,7 @@ public class CryptConsoleApplication {
 
 		if (command == null) {
 			System.out.println("A command is required");
-			System.out.println("Usage java -jar jmxhealth-cryp.jar <command>");
+			System.out.println("Usage java -jar jmxhealth-crypt.jar <command>");
 			printAvailableCommands();
 		}
 
