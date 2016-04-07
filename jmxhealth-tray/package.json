@@ -1,6 +1,6 @@
 {
   "name": "jmxhealth-tray",
-  "version": "$1",
+  "version": "0.1.0",
   "description": "System Tray application to watch jmxhealth monitored applications",
   "main": "index.html",
   "scripts": {
@@ -25,6 +25,7 @@
     "angular-aria": "^1.5.3",
     "angular-material": "^1.0.6",
     "angular-messages": "^1.5.3",
-    "pubsub-js": "^1.5.3"
+    "pubsub-js": "^1.5.3",
+    "simple-node-logger": "^0.93.11"
   }
 }
