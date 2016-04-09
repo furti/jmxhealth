@@ -25,3 +25,4 @@ git commit -m "Released Version $1"
 
 mvn package
 mvn release:prepare -Dusername=$2 -Dpassword=$3
+mvn release:clean
