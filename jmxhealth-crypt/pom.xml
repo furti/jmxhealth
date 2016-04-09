@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>io.github.furti.jmxhealth</groupId>
 		<artifactId>jmxhealth</artifactId>
-		<version>0.1.1-SNAPSHOT</version>
+		<version>0.2.0</version>
 	</parent>
 	<artifactId>jmxhealth-crypt</artifactId>
 
