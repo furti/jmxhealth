@@ -23,16 +23,23 @@ import io.github.furti.jmxhealth.HealthState;
 import io.github.furti.jmxhealth.server.config.Check;
 import io.github.furti.jmxhealth.server.config.RemoteServer;
 import io.github.furti.jmxhealth.server.config.Watcher;
+import io.github.furti.jmxhealth.server.template.Template;
+import io.github.furti.jmxhealth.server.template.TemplateParser;
 import io.github.furti.jmxhealth.server.validation.ValidationResult;
 
 public class RemoteConnection {
 	private JMXConnector connector;
 	private RemoteServer serverConfig;
+	private Map<Watcher, Template> watcherTemplates;
+	private TemplateParser templatParser;
 
-	public RemoteConnection(JMXConnector connector, RemoteServer serverConfig) {
+	public RemoteConnection(JMXConnector connector, RemoteServer serverConfig,
+			TemplateParser templateParser) {
 		super();
 		this.connector = connector;
 		this.serverConfig = serverConfig;
+		this.watcherTemplates = new HashMap<>();
+		this.templatParser = templateParser;
 	}
 
 	public MBeanServerConnection getConnection() throws IOException {
@@ -52,22 +59,33 @@ public class RemoteConnection {
 
 		for (Watcher watcher : this.serverConfig.getWatchers()) {
 			CheckGroup group = this.groupChecks(watcher);
+			Template messagePrefixTemplate = null;
+
+			if (watcher.getMessagePrefix() != null) {
+				messagePrefixTemplate = this.getTemplate(watcher, watcher.getMessagePrefix());
+			}
 
 			if (watcher.getBeanName() != null) {
-				result.addAll(this.queryAndValidate(group, new ObjectName(watcher.getBeanName())).values());
-
+				result.addAll(this
+						.queryAndValidate(group,
+								new ObjectName(watcher.getBeanName()),
+								messagePrefixTemplate)
+						.values());
 			} else if (watcher.getBeanQuery() != null) {
-				Collection<ObjectName> beanNames = getConnection().queryNames(new ObjectName(watcher.getBeanQuery()),
-						null);
+				Collection<ObjectName> beanNames = getConnection()
+						.queryNames(new ObjectName(watcher.getBeanQuery()), null);
 
 				if (beanNames.isEmpty()) {
-					throw new RuntimeException("No Beans where found for query " + watcher.getBeanQuery());
+					throw new RuntimeException(
+							"No Beans where found for query " + watcher.getBeanQuery());
 				}
 
 				Map<Check, AttributeState> statesByCheck = new HashMap<>();
 
 				for (ObjectName beanName : beanNames) {
-					Map<Check, AttributeState> validateResult = this.queryAndValidate(group, beanName);
+					Map<Check, AttributeState> validateResult = this.queryAndValidate(group,
+							beanName,
+							messagePrefixTemplate);
 
 					// Merge the result of all beans into a single entry per
 					// attribute
@@ -75,48 +93,73 @@ public class RemoteConnection {
 						if (!statesByCheck.containsKey(entry.getKey())) {
 							statesByCheck.put(entry.getKey(), entry.getValue());
 						} else {
-							HealthUtils.mergeAttributeState(entry.getValue(), statesByCheck.get(entry.getKey()));
+							HealthUtils.mergeAttributeState(entry.getValue(),
+									statesByCheck.get(entry.getKey()));
 						}
 					}
 				}
 
 				result.addAll(statesByCheck.values());
 			} else {
-				throw new IllegalArgumentException("One of beanName or beanQuery must be set. " + this.serverConfig);
+				throw new IllegalArgumentException(
+						"One of beanName or beanQuery must be set. " + this.serverConfig);
 			}
 		}
 
 		return result;
 	}
 
-	private Map<Check, AttributeState> queryAndValidate(CheckGroup group, ObjectName beanName) throws Exception {
-		AttributeList mBeanAttributes = null;
+	private Template getTemplate(Watcher watcher, String messagePrefix) {
+		if (!watcherTemplates.containsKey(watcher)) {
+			watcherTemplates.put(watcher, this.templatParser.parseTemplate(messagePrefix));
+		}
+
+		return watcherTemplates.get(watcher);
+	}
+
+	private Map<Check, AttributeState> queryAndValidate(CheckGroup group,
+			ObjectName beanName,
+			Template messagePrefixTemplate) throws Exception {
+		Map<String, Object> mBeanAttributes = null;
+
+		List<String> allAttributes = new ArrayList<>();
+
 		if (!group.getAllAttributes().isEmpty()) {
-			mBeanAttributes = this.getMBeanAttributes(beanName, this.getAttributeNames(group.getAllAttributes()));
+			allAttributes.addAll(group.getAllAttributes());
+		}
+
+		if (messagePrefixTemplate != null && !messagePrefixTemplate.getBeanAttributes().isEmpty()) {
+			allAttributes.addAll(messagePrefixTemplate.getBeanAttributes());
+		}
+
+		if (!allAttributes.isEmpty()) {
+			mBeanAttributes = this.getMBeanAttributes(beanName,
+					this.getAttributeNames(allAttributes));
 		}
 
 		List<PreparedCheck> checks = this.prepareChecks(group, mBeanAttributes);
 
-		return this.validateAttributes(checks);
+		return this.validateAttributes(checks, messagePrefixTemplate, mBeanAttributes);
 	}
 
-	private List<PreparedCheck> prepareChecks(CheckGroup group, AttributeList mBeanAttributes) {
+	private List<PreparedCheck> prepareChecks(CheckGroup group,
+			Map<String, Object> mBeanAttributes) {
 		List<PreparedCheck> checks = new ArrayList<>();
 
 		if (!group.getSelfValidations().isEmpty()) {
 			for (Check check : group.getSelfValidations()) {
-				checks.add(
-						new PreparedCheck(
-								HealthUtils.attributesToMap(mBeanAttributes,
-										check.getType().getRequiredAttributeNames(check.getValidationConfig())),
+				checks.add(new PreparedCheck(
+						HealthUtils.filterAttributes(mBeanAttributes,
+								check.getType()
+										.getRequiredAttributeNames(check.getValidationConfig())),
 						check));
 			}
 		}
 
 		if (!group.getAttributeValidations().isEmpty()) {
-			for (Attribute mBeanAttribute : mBeanAttributes.asList()) {
-				checks.add(new PreparedCheck(mBeanAttribute.getValue(),
-						group.getAttributeValidations().get(mBeanAttribute.getName())));
+			for (Entry<String, Check> entry : group.getAttributeValidations().entrySet()) {
+				checks.add(
+						new PreparedCheck(mBeanAttributes.get(entry.getKey()), entry.getValue()));
 			}
 		}
 
@@ -136,50 +179,64 @@ public class RemoteConnection {
 				group.getAttributeValidations().put(check.getAttributeName(), check);
 			} else {
 				group.getSelfValidations().add(check);
-				group.getAllAttributes().addAll(check.getType().getRequiredAttributeNames(check.getValidationConfig()));
+				group.getAllAttributes().addAll(
+						check.getType().getRequiredAttributeNames(check.getValidationConfig()));
 			}
 		}
 
 		return group;
 	}
 
-	private Map<Check, AttributeState> validateAttributes(List<PreparedCheck> checks) throws Exception {
+	private Map<Check, AttributeState> validateAttributes(List<PreparedCheck> checks,
+			Template messagePrefixTemplate,
+			Map<String, Object> mBeanAttributes) throws Exception {
 		Map<Check, AttributeState> result = new HashMap<>();
+		Map<String, Object> templateContext = new HashMap<>();
+		templateContext.put("bean", mBeanAttributes);
 
 		for (PreparedCheck preparedCheck : checks) {
 			Check check = preparedCheck.getCheck();
 
 			try {
-				ValidationResult validationresult = check.getType().validate(preparedCheck.getBeanToValidate(),
-						check.getValidationConfig());
+				ValidationResult validationresult = check.getType()
+						.validate(preparedCheck.getBeanToValidate(), check.getValidationConfig());
 
-				result.put(check, new AttributeState(check.getDisplayName(), validationresult.getState(),
-						validationresult.getMessage()));
+				if (messagePrefixTemplate != null && validationresult.getMessage() != null) {
+					validationresult.prefixMessage(messagePrefixTemplate.render(templateContext));
+				}
+
+				result.put(check,
+						new AttributeState(check.getDisplayName(), validationresult.getState(),
+								validationresult.getMessage()));
 			} catch (Exception ex) {
-				result.put(check, new AttributeState(check.getDisplayName(), HealthState.ALERT,
-						HealthUtils.createMessageWithStacktrace("Error validating attribute", ex)));
+				result.put(check,
+						new AttributeState(check.getDisplayName(), HealthState.ALERT, HealthUtils
+								.createMessageWithStacktrace("Error validating attribute", ex)));
 			}
 		}
 
 		return result;
 	}
 
-	private AttributeList getMBeanAttributes(ObjectName objectName, String[] attributeNames)
-			throws InstanceNotFoundException, ReflectionException, IOException, MalformedObjectNameException {
+	private Map<String, Object> getMBeanAttributes(ObjectName objectName, String[] attributeNames)
+			throws InstanceNotFoundException, ReflectionException, IOException,
+			MalformedObjectNameException {
 		AttributeList attributes = getConnection().getAttributes(objectName, attributeNames);
+		Map<String, Object> attributeMap = new HashMap<>();
 
-		// Validate the attributes
+		// Validate the attributes and add them to the map
 		List<String> missing = new ArrayList<String>(Arrays.asList(attributeNames));
 		for (Attribute a : attributes.asList()) {
 			missing.remove(a.getName());
+			attributeMap.put(a.getName(), a.getValue());
 		}
 
 		if (!missing.isEmpty()) {
-			throw new RuntimeException(
-					"Not all attributes where recieved for bean " + objectName + ". Missing attributes " + missing);
+			throw new RuntimeException("Not all attributes where recieved for bean " + objectName
+					+ ". Missing attributes " + missing);
 		}
 
-		return attributes;
+		return attributeMap;
 	}
 
 	private String[] getAttributeNames(Collection<String> attributes) {

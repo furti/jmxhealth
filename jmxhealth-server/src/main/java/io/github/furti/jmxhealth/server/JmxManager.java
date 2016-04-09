@@ -30,6 +30,7 @@ import io.github.furti.jmxhealth.HealthState;
 import io.github.furti.jmxhealth.crypt.CryptUtils;
 import io.github.furti.jmxhealth.server.config.RemoteConfig;
 import io.github.furti.jmxhealth.server.config.RemoteServer;
+import io.github.furti.jmxhealth.server.template.TemplateParser;
 
 @Service
 public class JmxManager {
@@ -43,11 +44,14 @@ public class JmxManager {
 	private StateManager stateManager;
 	private List<RemoteServer> failedConnections;
 	private boolean initialized = false;
+	private TemplateParser templateParser;
 
 	@Autowired
-	public JmxManager(ObjectMapper objectMapper, StateManager stateManager) {
+	public JmxManager(ObjectMapper objectMapper, StateManager stateManager,
+			TemplateParser templateParser) {
 		this.objectMapper = objectMapper;
 		this.stateManager = stateManager;
+		this.templateParser = templateParser;
 	}
 
 	@Scheduled(fixedDelay = 10000, initialDelay = 1000)
@@ -88,8 +92,8 @@ public class JmxManager {
 
 				LOG.error("Error polling " + connection.getServerConfig(), ex);
 				this.stateManager.remoteState(connection.getServerConfig(),
-						Arrays.asList(new AttributeState("POLL", HealthState.ALERT,
-								HealthUtils.createMessageWithStacktrace("Error polling Remote Server", ex))));
+						Arrays.asList(new AttributeState("POLL", HealthState.ALERT, HealthUtils
+								.createMessageWithStacktrace("Error polling Remote Server", ex))));
 			}
 		}
 	}
@@ -97,8 +101,10 @@ public class JmxManager {
 	@PostConstruct
 	public void configureRemotes() {
 		try {
-			Assert.notNull(dataLocation, "Data location must not be null. Set the path to the data file via "
-					+ HealthUtils.CONFIG_KEY + " System Property or Servlet Config Attribute.");
+			Assert.notNull(dataLocation,
+					"Data location must not be null. Set the path to the data file via "
+							+ HealthUtils.CONFIG_KEY
+							+ " System Property or Servlet Config Attribute.");
 
 			RemoteConfig config = objectMapper.readValue(new File(dataLocation + "/jmxhealth.json"),
 					RemoteConfig.class);
@@ -184,12 +190,12 @@ public class JmxManager {
 	private RemoteConnection createConnection(RemoteServer server) throws Exception {
 		LOG.info("Connecting to " + server);
 
-		JMXServiceURL url = new JMXServiceURL(
-				"service:jmx:rmi:///jndi/rmi://" + server.getHost() + ":" + server.getPort() + "/jmxrmi");
+		JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + server.getHost()
+				+ ":" + server.getPort() + "/jmxrmi");
 
 		JMXConnector connector = JMXConnectorFactory.connect(url, buildEnv(server));
 
-		return new RemoteConnection(connector, server);
+		return new RemoteConnection(connector, server, templateParser);
 	}
 
 	private Map<String, ?> buildEnv(RemoteServer server) throws Exception {

@@ -5,6 +5,7 @@ import java.util.List;
 public class Watcher {
 	private String beanName;
 	private String beanQuery;
+	private String messagePrefix;
 	private List<Check> checks;
 
 	public String getBeanName() {
@@ -34,6 +35,14 @@ public class Watcher {
 
 	public void setBeanQuery(String beanQuery) {
 		this.beanQuery = beanQuery;
+	}
+
+	public String getMessagePrefix() {
+		return messagePrefix;
+	}
+
+	public void setMessagePrefix(String messagePrefix) {
+		this.messagePrefix = messagePrefix;
 	}
 
 }

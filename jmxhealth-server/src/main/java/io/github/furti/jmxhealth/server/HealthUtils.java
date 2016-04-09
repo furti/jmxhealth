@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.management.Attribute;
-import javax.management.AttributeList;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.TabularDataSupport;
 
@@ -28,7 +26,9 @@ public final class HealthUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T getPropertyFromAttributeValue(Object attributeValue, String propertyPath, Class<T> type) {
+	public static <T> T getPropertyFromAttributeValue(Object attributeValue,
+			String propertyPath,
+			Class<T> type) {
 		Collection<Object> propertyNames = parsePropertyPath(propertyPath);
 
 		for (Object propertyName : propertyNames) {
@@ -56,8 +56,8 @@ public final class HealthUtils {
 			} else if (attributeValue instanceof Map) {
 				attributeValue = ((Map<Object, Object>) attributeValue).get(propertyName);
 			} else {
-				throw new IllegalArgumentException("Error getting property " + propertyName + " from attribute value "
-						+ attributeValue + ". Class not supported.");
+				throw new IllegalArgumentException("Error getting property " + propertyName
+						+ " from attribute value " + attributeValue + ". Class not supported.");
 			}
 		}
 
@@ -78,10 +78,12 @@ public final class HealthUtils {
 		return builder.toString();
 	}
 
-	public static StateResponse toStateResponse(String application, String environment, String server,
+	public static StateResponse toStateResponse(String application,
+			String environment,
+			String server,
 			List<AttributeState> states) {
-		Optional<HealthState> overallState = states.stream().map((attributeState) -> attributeState.getState())
-				.max((state1, state2) -> {
+		Optional<HealthState> overallState = states.stream()
+				.map((attributeState) -> attributeState.getState()).max((state1, state2) -> {
 					return state1.getWeight() - state2.getWeight();
 				});
 
@@ -90,9 +92,11 @@ public final class HealthUtils {
 		}
 
 		List<AttributeState> unsuccessfulStates = states.stream()
-				.filter((attributeState) -> attributeState.getState() != HealthState.OK).collect(Collectors.toList());
+				.filter((attributeState) -> attributeState.getState() != HealthState.OK)
+				.collect(Collectors.toList());
 
-		return new StateResponse(application, environment, server, overallState.get(), unsuccessfulStates);
+		return new StateResponse(application, environment, server, overallState.get(),
+				unsuccessfulStates);
 	}
 
 	private static Collection<Object> parsePropertyPath(String propertyPath) {
@@ -111,21 +115,19 @@ public final class HealthUtils {
 		return path;
 	}
 
-	public static Map<String, Object> attributesToMap(AttributeList mBeanAttributes,
+	public static Map<String, Object> filterAttributes(Map<String, Object> mBeanAttributes,
 			Collection<String> requiredAttributeNames) {
 		if (mBeanAttributes == null) {
 			return new HashMap<>();
 		}
 
-		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> filtered = new HashMap<>();
 
-		for (Attribute attribute : mBeanAttributes.asList()) {
-			if (requiredAttributeNames.contains(attribute.getName())) {
-				map.put(attribute.getName(), attribute.getValue());
-			}
+		for (String attributeName : requiredAttributeNames) {
+			filtered.put(attributeName, mBeanAttributes.get(attributeName));
 		}
 
-		return map;
+		return filtered;
 	}
 
 	public static void mergeAttributeState(AttributeState source, AttributeState target) {

@@ -63,6 +63,12 @@ One of beanName ore beanQuery must be specified. If both are specified it's not 
 If beanName is set the MBean with the given name will be validated with the given checks.
 If beanQuery is set all MBeans matching this query will be validated with the given checks.
 
+#### messagePrefix
+A expression used to prefix the message build for each check. Is especially usefull in combination with the _beanQuery_ attribute.
+_beanQuery_ adds a message for each bean that was found. To distinct between this beans the prefix could be used.
+
+You can access bean attributes by adding expressions in the form ${bean.attributeName}.
+
 #### checks
 A list of checks to perform on this bean.
 See _Check subfields_ below.
@@ -125,6 +131,7 @@ Checks tat the attributes value is greater than the given value.
 }```
 
 ## Example configuration
+Following is a example configuration that monitors some properties of a Tomcat instance.
 
 ```javascript
 {
@@ -134,7 +141,7 @@ Checks tat the attributes value is greater than the given value.
     "host": "localhost",
     "port": 10001,
     "username": "jmxhealth",
-    "password": "4LNlGIet0QJZ/BJllUefvg==",
+    "password": "<really complex encrypted password>",
     "watchers": [{
       "beanName": "java.lang:type=GarbageCollector,name=PS MarkSweep",
       "checks": [{
@@ -168,6 +175,18 @@ Checks tat the attributes value is greater than the given value.
           "actual": "currentThreadsBusy",
           "warnOn": 50,
           "alertOn": 60
+        }
+      }]
+    }, {
+      "beanQuery": "Catalina:type=RequestProcessor,worker=\"http-apr-9080\",name=*",
+      "messagePrefix": "${bean.currentUri}?${bean.currentQueryString}",
+      "checks": [{
+        "displayName": "RequestTime",
+        "attributeName": "requestProcessingTime",
+        "type": "GREATER",
+        "validationConfig": {
+          "warnOn": 20000,
+          "alertOn": 30000
         }
       }]
     }]
