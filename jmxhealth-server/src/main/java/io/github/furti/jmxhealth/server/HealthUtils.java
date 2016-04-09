@@ -127,4 +127,18 @@ public final class HealthUtils {
 
 		return map;
 	}
+
+	public static void mergeAttributeState(AttributeState source, AttributeState target) {
+		if (source.getState().getWeight() > target.getState().getWeight()) {
+			target.setState(source.getState());
+		}
+
+		if (source.getMessage() != null) {
+			if (target.getMessage() == null) {
+				target.setMessage(source.getMessage());
+			} else {
+				target.setMessage(target.getMessage() + "\n" + source.getMessage());
+			}
+		}
+	}
 }

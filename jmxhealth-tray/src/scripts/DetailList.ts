@@ -6,12 +6,12 @@ namespace jmxhealth {
     class DetailListController {
         static $injects = ['$scope'];
 
-        public failedStates: api.StateResponse[];
-        private filterState: api.StateResponse;
+        public failedStates: DetailStateResponse[];
+        // private filterState: api.StateResponse;
 
         constructor($scope: angular.IScope) {
             pubsub.subscribe(topic.FAILED_STATES, (message, failed) => {
-                this.failedStates = failed;
+                this.failedStates = this.prepareStates(failed);
 
                 if (this.shouldShow()) {
                     this.show();
@@ -21,7 +21,7 @@ namespace jmxhealth {
             });
 
             pubsub.subscribe(topic.SHOW_DETAIL, (message, state) => {
-                this.filterState = state;
+                // this.filterState = state;
                 $scope.$apply();
                 this.show();
             });
@@ -84,6 +84,47 @@ namespace jmxhealth {
             }
 
             return true;
+        }
+
+        private prepareStates(states: api.StateResponse[]): DetailStateResponse[] {
+            var prepared: DetailStateResponse[] = [];
+
+            for (var state of states) {
+                var preparedState: DetailStateResponse = {
+                    application: state.application,
+                    environment: state.environment,
+                    server: state.server,
+                    overallState: state.overallState,
+                    unsuccessfulAttributes: [],
+                    paused: state.paused
+                };
+
+
+
+                if (state.unsuccessfulAttributes) {
+                    for (var attribute of state.unsuccessfulAttributes) {
+                        preparedState.unsuccessfulAttributes.push({
+                            attributeName: attribute.attributeName,
+                            state: attribute.state,
+                            message: attribute.message,
+                            timestamp: attribute.timestamp,
+                            lines: this.messageToLines(attribute.message)
+                        });
+                    }
+                }
+
+                prepared.push(preparedState);
+            }
+
+            return prepared;
+        }
+
+        private messageToLines(message: string): string[] {
+            if (!message) {
+                return null;
+            }
+
+            return message.split('\n');
         }
     }
 

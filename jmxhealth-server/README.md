@@ -58,8 +58,10 @@ See _Watcher subfields_ below.
 
 ### Watcher subfields
 
-#### beanName
-The name of the JMX Bean to monitor.
+#### beanName / beanQuery
+One of beanName ore beanQuery must be specified. If both are specified it's not defined wich one will be used.
+If beanName is set the MBean with the given name will be validated with the given checks.
+If beanQuery is set all MBeans matching this query will be validated with the given checks.
 
 #### checks
 A list of checks to perform on this bean.

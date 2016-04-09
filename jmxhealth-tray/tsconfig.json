@@ -11,6 +11,7 @@
   "files": [
     "./src/scripts/CommonConfig.ts",
     "./src/scripts/DetailList.ts",
+    "./src/scripts/DetailStateResponse.ts",
     "./src/scripts/include.d.ts",
     "./src/scripts/Logging.ts",
     "./src/scripts/Main.ts",

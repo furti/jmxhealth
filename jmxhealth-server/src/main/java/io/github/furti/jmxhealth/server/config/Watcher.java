@@ -4,6 +4,7 @@ import java.util.List;
 
 public class Watcher {
 	private String beanName;
+	private String beanQuery;
 	private List<Check> checks;
 
 	public String getBeanName() {
@@ -25,6 +26,14 @@ public class Watcher {
 	@Override
 	public String toString() {
 		return "Watcher [beanName=" + beanName + "]";
+	}
+
+	public String getBeanQuery() {
+		return beanQuery;
+	}
+
+	public void setBeanQuery(String beanQuery) {
+		this.beanQuery = beanQuery;
 	}
 
 }

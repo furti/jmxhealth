@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -52,19 +53,51 @@ public class RemoteConnection {
 		for (Watcher watcher : this.serverConfig.getWatchers()) {
 			CheckGroup group = this.groupChecks(watcher);
 
-			AttributeList mBeanAttributes = null;
+			if (watcher.getBeanName() != null) {
+				result.addAll(this.queryAndValidate(group, new ObjectName(watcher.getBeanName())).values());
 
-			if (!group.getAllAttributes().isEmpty()) {
-				mBeanAttributes = this.getMBeanAttributes(watcher.getBeanName(),
-						this.getAttributeNames(group.getAllAttributes()));
+			} else if (watcher.getBeanQuery() != null) {
+				Collection<ObjectName> beanNames = getConnection().queryNames(new ObjectName(watcher.getBeanQuery()),
+						null);
+
+				if (beanNames.isEmpty()) {
+					throw new RuntimeException("No Beans where found for query " + watcher.getBeanQuery());
+				}
+
+				Map<Check, AttributeState> statesByCheck = new HashMap<>();
+
+				for (ObjectName beanName : beanNames) {
+					Map<Check, AttributeState> validateResult = this.queryAndValidate(group, beanName);
+
+					// Merge the result of all beans into a single entry per
+					// attribute
+					for (Entry<Check, AttributeState> entry : validateResult.entrySet()) {
+						if (!statesByCheck.containsKey(entry.getKey())) {
+							statesByCheck.put(entry.getKey(), entry.getValue());
+						} else {
+							HealthUtils.mergeAttributeState(entry.getValue(), statesByCheck.get(entry.getKey()));
+						}
+					}
+				}
+
+				result.addAll(statesByCheck.values());
+			} else {
+				throw new IllegalArgumentException("One of beanName or beanQuery must be set. " + this.serverConfig);
 			}
-
-			List<PreparedCheck> checks = this.prepareChecks(group, mBeanAttributes);
-
-			result.addAll(this.validateAttributes(checks));
 		}
 
 		return result;
+	}
+
+	private Map<Check, AttributeState> queryAndValidate(CheckGroup group, ObjectName beanName) throws Exception {
+		AttributeList mBeanAttributes = null;
+		if (!group.getAllAttributes().isEmpty()) {
+			mBeanAttributes = this.getMBeanAttributes(beanName, this.getAttributeNames(group.getAllAttributes()));
+		}
+
+		List<PreparedCheck> checks = this.prepareChecks(group, mBeanAttributes);
+
+		return this.validateAttributes(checks);
 	}
 
 	private List<PreparedCheck> prepareChecks(CheckGroup group, AttributeList mBeanAttributes) {
@@ -110,8 +143,8 @@ public class RemoteConnection {
 		return group;
 	}
 
-	private List<AttributeState> validateAttributes(List<PreparedCheck> checks) throws Exception {
-		List<AttributeState> result = new ArrayList<>();
+	private Map<Check, AttributeState> validateAttributes(List<PreparedCheck> checks) throws Exception {
+		Map<Check, AttributeState> result = new HashMap<>();
 
 		for (PreparedCheck preparedCheck : checks) {
 			Check check = preparedCheck.getCheck();
@@ -120,10 +153,10 @@ public class RemoteConnection {
 				ValidationResult validationresult = check.getType().validate(preparedCheck.getBeanToValidate(),
 						check.getValidationConfig());
 
-				result.add(new AttributeState(check.getDisplayName(), validationresult.getState(),
+				result.put(check, new AttributeState(check.getDisplayName(), validationresult.getState(),
 						validationresult.getMessage()));
 			} catch (Exception ex) {
-				result.add(new AttributeState(check.getDisplayName(), HealthState.ALERT,
+				result.put(check, new AttributeState(check.getDisplayName(), HealthState.ALERT,
 						HealthUtils.createMessageWithStacktrace("Error validating attribute", ex)));
 			}
 		}
@@ -131,10 +164,8 @@ public class RemoteConnection {
 		return result;
 	}
 
-	private AttributeList getMBeanAttributes(String beanName, String[] attributeNames)
+	private AttributeList getMBeanAttributes(ObjectName objectName, String[] attributeNames)
 			throws InstanceNotFoundException, ReflectionException, IOException, MalformedObjectNameException {
-		ObjectName objectName = new ObjectName(beanName);
-
 		AttributeList attributes = getConnection().getAttributes(objectName, attributeNames);
 
 		// Validate the attributes
@@ -145,7 +176,7 @@ public class RemoteConnection {
 
 		if (!missing.isEmpty()) {
 			throw new RuntimeException(
-					"Not all attributes where recieved for bean " + beanName + ". Missing attributes " + missing);
+					"Not all attributes where recieved for bean " + objectName + ". Missing attributes " + missing);
 		}
 
 		return attributes;
