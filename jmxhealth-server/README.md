@@ -103,25 +103,24 @@ Checks tat the attribute has a given value. If the value is different a alert wi
 }
 ```
 
-### MIN
-Checks tat the attributes value is bigger than the given value.
-If the value is smaller a alert will be emitted.
+### LOWER
+Checks if the attributes value is lower than the given values.
 
 ```javascript
 "validationConfig": {
-  "value": <The min value. Must be a Number>
+  "warnOn": <When the attribute value drops under this value a warning is emitted. Must be a Number>,
+  "alertOn": <When the attribute value drops under this value a alert is emitted. Must be a Number>
 }
 ```
 
-### MAX
-Checks tat the attributes value is smaller than the given value.
-If the value is bigger a alert will be emitted.
+### GREATER
+Checks tat the attributes value is greater than the given value.
 
 ```javascript
 "validationConfig": {
-  "value": <The max value. Must be a Number>
-}
-```
+  "warnOn": <When the attribute value rises over this value a warning is emitted. Must be a Number>,
+  "alertOn": <When the attribute value rises over this value a alert is emitted. Must be a Number>
+}```
 
 ## Example configuration
 

@@ -33,41 +33,59 @@ public class ValidationTypeTest {
 		};
 	}
 
-	@Test(dataProvider = "validateMinData")
-	public void validateMin(Object attributeValue, Map<String, Object> validationConfig, ValidationResult expected)
-			throws Exception {
-		validate(attributeValue, validationConfig, expected, ValidationType.MIN);
+	@Test(dataProvider = "validateLowerThanData")
+	public void validateLowerThan(Object attributeValue, Map<String, Object> validationConfig,
+			ValidationResult expected) throws Exception {
+		validate(attributeValue, validationConfig, expected, ValidationType.LOWER);
 	}
 
 	@DataProvider
-	public Object[][] validateMinData() {
+	public Object[][] validateLowerThanData() {
 		Map<String, Object> validationConfig = new HashMap<>();
-		validationConfig.put("value", 10);
+		validationConfig.put("warnOn", 20);
+		validationConfig.put("alertOn", 10);
 
 		return new Object[][] { //
-				{ 20, validationConfig, new ValidationResult(HealthState.OK) }, //
-				{ 10, validationConfig, new ValidationResult(HealthState.OK) }, //
-				{ 9, validationConfig,
-						new ValidationResult(HealthState.ALERT, "Actual value \"9\" is smaller than \"10\"") } //
+				{ 21, validationConfig, new ValidationResult(HealthState.OK) }, //
+				{ 30, validationConfig, new ValidationResult(HealthState.OK) }, //
+				{ 20, validationConfig,
+						new ValidationResult(HealthState.WARN, "Actual value \"20\" is less than or equal to \"20\"") }, //
+				{ 11, validationConfig,
+						new ValidationResult(HealthState.WARN, "Actual value \"11\" is less than or equal to \"20\"") }, //
+				{ 10, validationConfig,
+						new ValidationResult(HealthState.ALERT,
+								"Actual value \"10\" is less than or equal to \"10\"") }, //
+				{ 5, validationConfig,
+						new ValidationResult(HealthState.ALERT, "Actual value \"5\" is less than or equal to \"10\"") } //
 		};
 	}
 
-	@Test(dataProvider = "validateMaxData")
-	public void validateMax(Object attributeValue, Map<String, Object> validationConfig, ValidationResult expected)
-			throws Exception {
-		validate(attributeValue, validationConfig, expected, ValidationType.MAX);
+	@Test(dataProvider = "validateGreaterThanData")
+	public void validateGreaterThan(Object attributeValue, Map<String, Object> validationConfig,
+			ValidationResult expected) throws Exception {
+		validate(attributeValue, validationConfig, expected, ValidationType.GREATER);
 	}
 
 	@DataProvider
-	public Object[][] validateMaxData() {
+	public Object[][] validateGreaterThanData() {
 		Map<String, Object> validationConfig = new HashMap<>();
-		validationConfig.put("value", 10);
+		validationConfig.put("warnOn", 10);
+		validationConfig.put("alertOn", 20);
 
 		return new Object[][] { //
-				{ 8, validationConfig, new ValidationResult(HealthState.OK) }, //
-				{ 10, validationConfig, new ValidationResult(HealthState.OK) }, //
+				{ 5, validationConfig, new ValidationResult(HealthState.OK) }, //
+				{ 9, validationConfig, new ValidationResult(HealthState.OK) }, //
+				{ 10, validationConfig,
+						new ValidationResult(HealthState.WARN,
+								"Actual value \"10\" is bigger than or equal to \"10\"") }, //
+				{ 19, validationConfig,
+						new ValidationResult(HealthState.WARN,
+								"Actual value \"19\" is bigger than or equal to \"10\"") }, //
 				{ 20, validationConfig,
-						new ValidationResult(HealthState.ALERT, "Actual value \"20\" is bigger than \"10\"") } //
+						new ValidationResult(HealthState.ALERT,
+								"Actual value \"20\" is bigger than or equal to \"20\"") }, //
+				{ 30, validationConfig, new ValidationResult(HealthState.ALERT,
+						"Actual value \"30\" is bigger than or equal to \"20\"") }, //
 		};
 	}
 
@@ -78,15 +96,5 @@ public class ValidationTypeTest {
 		assertThat(actual, notNullValue());
 		assertThat(actual.getState(), equalTo(expected.getState()));
 		assertThat(actual.getMessage(), equalTo(expected.getMessage()));
-	}
-
-	private Map<String, Object> toMap(Object... args) {
-		Map<String, Object> map = new HashMap<>();
-
-		for (int i = 0; i < args.length; i += 2) {
-			map.put((String) args[i], args[i + 1]);
-		}
-
-		return map;
 	}
 }

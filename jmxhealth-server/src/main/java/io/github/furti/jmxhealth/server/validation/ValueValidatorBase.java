@@ -7,12 +7,12 @@ import java.util.Map;
 import io.github.furti.jmxhealth.HealthState;
 
 public abstract class ValueValidatorBase<T> implements AttributeValidator {
-	private static final String VALUE_KEY = "value";
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public ValidationResult validate(Object attributeValue, Map<String, Object> validationConfig) {
-		Object value = validationConfig.get(VALUE_KEY);
+		Object warnValue = validationConfig.get(WARN_KEY);
+		Object alertValue = validationConfig.get(ALERT_KEY);
 
 		String typeMessage = validateType(attributeValue);
 
@@ -20,12 +20,22 @@ public abstract class ValueValidatorBase<T> implements AttributeValidator {
 			return new ValidationResult(HealthState.WARN, typeMessage);
 		}
 
-		return doValidate((T) attributeValue, (T) value);
+		HealthState state = doValidate((T) attributeValue, (T) warnValue, (T) alertValue);
+
+		if (state == HealthState.WARN) {
+			return new ValidationResult(state, buildMessage((T) attributeValue, (T) warnValue));
+		} else if (state == HealthState.ALERT) {
+			return new ValidationResult(state, buildMessage((T) attributeValue, (T) alertValue));
+		}
+
+		return new ValidationResult(state);
 	}
 
 	protected abstract String validateType(Object attributeValue);
 
-	protected abstract ValidationResult doValidate(T attributeValue, T expectedValue);
+	protected abstract HealthState doValidate(T attributeValue, T warnValue, T alertValue);
+
+	protected abstract String buildMessage(T attributeValue, T expectedValue);
 
 	@Override
 	public Collection<String> getRequiredAttributeNames(Map<String, Object> validationConfig) {
