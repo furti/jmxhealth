@@ -1,19 +1,21 @@
 package io.github.furti.jmxhealth.server.validation;
 
-import org.springframework.util.ObjectUtils;
-
 import io.github.furti.jmxhealth.HealthState;
 
-public class EqualsValidator extends ValueValidatorBase<Object> {
+public class MaxValidator extends ValueValidatorBase<Number> {
 
 	@Override
 	protected String validateType(Object attributeValue) {
+		if (!(attributeValue instanceof Number)) {
+			return "Cant't validate " + attributeValue + ". Not an instance of Number";
+		}
+
 		return null;
 	}
 
 	@Override
-	protected ValidationResult doValidate(Object attributeValue, Object expectedValue) {
-		if (!ObjectUtils.nullSafeEquals(attributeValue, expectedValue)) {
+	protected ValidationResult doValidate(Number attributeValue, Number expectedValue) {
+		if (attributeValue.floatValue() > expectedValue.floatValue()) {
 			return new ValidationResult(HealthState.ALERT, this.buildMessage(attributeValue, expectedValue));
 		}
 
@@ -21,7 +23,6 @@ public class EqualsValidator extends ValueValidatorBase<Object> {
 	}
 
 	private String buildMessage(Object attributeValue, Object expectedValue) {
-		return "Actual value \"" + attributeValue + "\" and expected value \"" + expectedValue + "\" do not match";
+		return "Actual value \"" + attributeValue + "\" is bigger than \"" + expectedValue + "\"";
 	}
-
 }

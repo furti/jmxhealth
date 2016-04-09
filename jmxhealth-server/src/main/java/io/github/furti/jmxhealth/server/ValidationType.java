@@ -5,11 +5,14 @@ import java.util.Map;
 
 import io.github.furti.jmxhealth.server.validation.AttributeValidator;
 import io.github.furti.jmxhealth.server.validation.EqualsValidator;
+import io.github.furti.jmxhealth.server.validation.MaxValidator;
+import io.github.furti.jmxhealth.server.validation.MinValidator;
 import io.github.furti.jmxhealth.server.validation.PercentageValidator;
 import io.github.furti.jmxhealth.server.validation.ValidationResult;
 
 public enum ValidationType {
-	PERCENTAGE(new PercentageValidator()), EQUALS(new EqualsValidator());
+	PERCENTAGE(new PercentageValidator()), EQUALS(new EqualsValidator()), MIN(new MinValidator()), MAX(
+			new MaxValidator());
 
 	private AttributeValidator validator;
 

@@ -99,7 +99,27 @@ Checks tat the attribute has a given value. If the value is different a alert wi
 
 ```javascript
 "validationConfig": {
-  "expectedValue": "The value you expect for the given attribute"
+  "value": "The value you expect for the given attribute"
+}
+```
+
+### MIN
+Checks tat the attributes value is bigger than the given value.
+If the value is smaller a alert will be emitted.
+
+```javascript
+"validationConfig": {
+  "value": <The min value. Must be a Number>
+}
+```
+
+### MAX
+Checks tat the attributes value is smaller than the given value.
+If the value is bigger a alert will be emitted.
+
+```javascript
+"validationConfig": {
+  "value": <The max value. Must be a Number>
 }
 ```
 
@@ -134,7 +154,7 @@ Checks tat the attribute has a given value. If the value is different a alert wi
         "attributeName": "stateName",
         "type": "EQUALS",
         "validationConfig": {
-          "expectedValue": "STARTED"
+          "value": "STARTED"
         }
       }]
     }, {
