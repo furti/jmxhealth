@@ -15,19 +15,15 @@
       </md-card-avatar>
     </md-card-header>
     <md-card-content>
-      <md-content>
-        <md-list flex ng-hide="$ctrl.message">
-          <md-list-item class="md-3-line md-long-text" ng-repeat="attribute in state.unsuccessfulAttributes">
-            <img ng-src="{{$ctrl.attributeIcon(attribute)}}" class="md-avatar" />
-            <div class="md-list-item-text" layout="column">
-              <h3>{{ attribute.attributeName }} - {{ attribute.timestamp }}</h3>
-              <p>
-                <div ng-repeat="line in attribute.lines">{{ line }}</div>
-              </p>
-            </div>
-          </md-list-item>
-        </md-list>
-      </md-content>
+      <md-list flex ng-hide="$ctrl.message">
+        <md-list-item class="md-3-line md-long-text" ng-repeat="attribute in state.unsuccessfulAttributes">
+          <img ng-src="{{$ctrl.attributeIcon(attribute)}}" class="md-avatar" />
+          <div class="md-list-item-text" layout="column">
+            <h3>{{ attribute.attributeName }} - {{ attribute.timestamp }}</h3>
+            <p ng-repeat="line in attribute.lines">{{ line }}</p>
+          </div>
+        </md-list-item>
+      </md-list>
     </md-card-content>
     <md-card-actions layout="row" layout-align="end center">
       <md-button ng-hide="state.paused" ng-click="$ctrl.pauseState(state)">

@@ -21,3 +21,6 @@ md-list-item > md-icon:first-child:not(.md-avatar-icon), md-list-item .md-list-i
 .icon-80 {
   font-size: 80px;
 }
+.md-avatar {
+  min-width: 40px;
+}
