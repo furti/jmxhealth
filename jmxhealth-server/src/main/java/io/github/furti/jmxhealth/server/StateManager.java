@@ -61,8 +61,8 @@ public class StateManager {
 	 */
 	public void failed(String attribute, String message, Exception ex) {
 		this.removeFailedState(attribute);
-		this.selfState.add(
-				new AttributeState(attribute, HealthState.ALERT, HealthUtils.createMessageWithStacktrace(message, ex)));
+		this.selfState.add(new AttributeState(attribute, HealthState.ALERT,
+				HealthUtils.createMessageWithStacktrace(message, ex)));
 	}
 
 	public void removeFailedState(String attribute) {
@@ -82,20 +82,22 @@ public class StateManager {
 	}
 
 	public void remoteState(RemoteServer remoteServer, List<AttributeState> attributeStates) {
-		this.removeRemoteState(remoteServer);
-
 		StateResponse stateResponse = HealthUtils.toStateResponse(remoteServer.getApplication(),
-				remoteServer.getEnvironment(), remoteServer.getHost(), attributeStates);
+				remoteServer.getEnvironment(),
+				remoteServer.getHost(),
+				attributeStates);
+
+		this.removeRemoteState(stateResponse);
 
 		if (stateResponse.getOverallState() != HealthState.OK) {
 			try {
 				this.writeToDisk(stateResponse);
-				this.removeFailedState(
-						"DISK_STORAGE-" + stateResponse.getApplication() + "-" + stateResponse.getEnvironment());
+				this.removeFailedState("DISK_STORAGE-" + stateResponse.getApplication() + "-"
+						+ stateResponse.getEnvironment());
 			} catch (IOException e) {
 				LOG.error("Error writing to disk", e);
-				this.failed("DISK_STORAGE-" + stateResponse.getApplication() + "-" + stateResponse.getEnvironment(),
-						"Error writing to disk", e);
+				this.failed("DISK_STORAGE-" + stateResponse.getApplication() + "-"
+						+ stateResponse.getEnvironment(), "Error writing to disk", e);
 			}
 		}
 
@@ -107,7 +109,8 @@ public class StateManager {
 		List<StateResponse> responses = new ArrayList<>();
 
 		for (StateResponse remoteState : this.remoteStates) {
-			if (remoteState.getApplication().equals(application) && remoteState.getEnvironment().equals(environment)) {
+			if (remoteState.getApplication().equals(application)
+					&& remoteState.getEnvironment().equals(environment)) {
 				responses.add(remoteState);
 			}
 		}
@@ -119,14 +122,13 @@ public class StateManager {
 		return responses;
 	}
 
-	private void removeRemoteState(RemoteServer toDelete) {
+	private void removeRemoteState(StateResponse toDelete) {
 		Iterator<StateResponse> it = this.remoteStates.iterator();
 
 		while (it.hasNext()) {
 			StateResponse state = it.next();
 
-			if (state.getApplication().equals(toDelete.getApplication())
-					&& state.getEnvironment().equals(toDelete.getEnvironment())) {
+			if (state.equals(toDelete)) {
 				it.remove();
 			}
 		}
@@ -135,8 +137,7 @@ public class StateManager {
 	private void writeToDisk(StateResponse stateResponse) throws IOException {
 		String now = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
 
-		Path path = Paths.get(dataLocation,
-				stateResponse.getApplication() + "-" + stateResponse.getEnvironment() + "_" + now + ".json");
+		Path path = Paths.get(dataLocation, stateResponse.description() + "_" + now + ".json");
 
 		List<AttributeState> currentStates = null;
 
