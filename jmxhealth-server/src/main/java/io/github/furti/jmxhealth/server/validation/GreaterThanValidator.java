@@ -27,7 +27,7 @@ public class GreaterThanValidator extends ValueValidatorBase<Number> {
 	}
 
 	@Override
-	protected String buildMessage(Number attributeValue, Number expectedValue) {
+	protected String buildDefaultMessage(Number attributeValue, Number expectedValue) {
 		return "Actual value \"" + attributeValue + "\" is bigger than or equal to \"" + expectedValue + "\"";
 	}
 }

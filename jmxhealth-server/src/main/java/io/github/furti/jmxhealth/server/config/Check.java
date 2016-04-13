@@ -13,6 +13,11 @@ public class Check {
 	 */
 	private String attributeName;
 
+	/**
+	 * Optional template for messages to emit.
+	 */
+	private String message;
+
 	private ValidationType type;
 	private Map<String, Object> validationConfig;
 
@@ -61,5 +66,25 @@ public class Check {
 	@Override
 	public String toString() {
 		return "Check [displayName=" + displayName + "]";
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	@Override
+	public int hashCode() {
+		// Do not override. Checks have to be unique.
+		return super.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		// Do not override. Checks have to be unique.
+		return super.equals(obj);
 	}
 }

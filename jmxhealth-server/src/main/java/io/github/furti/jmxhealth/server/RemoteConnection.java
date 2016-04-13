@@ -30,7 +30,7 @@ import io.github.furti.jmxhealth.server.validation.ValidationResult;
 public class RemoteConnection {
 	private JMXConnector connector;
 	private RemoteServer serverConfig;
-	private Map<Watcher, Template> watcherTemplates;
+	private Map<Check, Template> checkTemplates;
 	private TemplateParser templatParser;
 
 	public RemoteConnection(JMXConnector connector, RemoteServer serverConfig,
@@ -38,7 +38,7 @@ public class RemoteConnection {
 		super();
 		this.connector = connector;
 		this.serverConfig = serverConfig;
-		this.watcherTemplates = new HashMap<>();
+		this.checkTemplates = new HashMap<>();
 		this.templatParser = templateParser;
 	}
 
@@ -60,10 +60,6 @@ public class RemoteConnection {
 		for (Watcher watcher : this.serverConfig.getWatchers()) {
 			CheckGroup group = this.groupChecks(watcher);
 			Template messagePrefixTemplate = null;
-
-			if (watcher.getMessagePrefix() != null) {
-				messagePrefixTemplate = this.getTemplate(watcher, watcher.getMessagePrefix());
-			}
 
 			if (watcher.getBeanName() != null) {
 				result.addAll(this
@@ -109,12 +105,12 @@ public class RemoteConnection {
 		return result;
 	}
 
-	private Template getTemplate(Watcher watcher, String messagePrefix) {
-		if (!watcherTemplates.containsKey(watcher)) {
-			watcherTemplates.put(watcher, this.templatParser.parseTemplate(messagePrefix));
+	private Template getTemplate(Check check, String messageTemplate) {
+		if (!checkTemplates.containsKey(check)) {
+			checkTemplates.put(check, this.templatParser.parseTemplate(messageTemplate));
 		}
 
-		return watcherTemplates.get(watcher);
+		return checkTemplates.get(check);
 	}
 
 	private Map<Check, AttributeState> queryAndValidate(CheckGroup group,
@@ -122,24 +118,14 @@ public class RemoteConnection {
 			Template messagePrefixTemplate) throws Exception {
 		Map<String, Object> mBeanAttributes = null;
 
-		List<String> allAttributes = new ArrayList<>();
-
 		if (!group.getAllAttributes().isEmpty()) {
-			allAttributes.addAll(group.getAllAttributes());
-		}
-
-		if (messagePrefixTemplate != null && !messagePrefixTemplate.getBeanAttributes().isEmpty()) {
-			allAttributes.addAll(messagePrefixTemplate.getBeanAttributes());
-		}
-
-		if (!allAttributes.isEmpty()) {
 			mBeanAttributes = this.getMBeanAttributes(beanName,
-					this.getAttributeNames(allAttributes));
+					this.getAttributeNames(group.getAllAttributes()));
 		}
 
 		List<PreparedCheck> checks = this.prepareChecks(group, mBeanAttributes);
 
-		return this.validateAttributes(checks, messagePrefixTemplate, mBeanAttributes);
+		return this.validateAttributes(checks, mBeanAttributes);
 	}
 
 	private List<PreparedCheck> prepareChecks(CheckGroup group,
@@ -182,13 +168,18 @@ public class RemoteConnection {
 				group.getAllAttributes().addAll(
 						check.getType().getRequiredAttributeNames(check.getValidationConfig()));
 			}
+
+			if (check.getMessage() != null) {
+				Template template = this.getTemplate(check, check.getMessage());
+
+				group.getAllAttributes().addAll(template.getBeanAttributes());
+			}
 		}
 
 		return group;
 	}
 
 	private Map<Check, AttributeState> validateAttributes(List<PreparedCheck> checks,
-			Template messagePrefixTemplate,
 			Map<String, Object> mBeanAttributes) throws Exception {
 		Map<Check, AttributeState> result = new HashMap<>();
 		Map<String, Object> templateContext = new HashMap<>();
@@ -196,14 +187,18 @@ public class RemoteConnection {
 
 		for (PreparedCheck preparedCheck : checks) {
 			Check check = preparedCheck.getCheck();
+			Template messageTemplate = null;
+
+			if (check.getMessage() != null) {
+				messageTemplate = this.getTemplate(check, check.getMessage());
+			}
 
 			try {
-				ValidationResult validationresult = check.getType()
-						.validate(preparedCheck.getBeanToValidate(), check.getValidationConfig());
-
-				if (messagePrefixTemplate != null && validationresult.getMessage() != null) {
-					validationresult.prefixMessage(messagePrefixTemplate.render(templateContext));
-				}
+				ValidationResult validationresult = check.getType().validate(
+						preparedCheck.getBeanToValidate(),
+						check.getValidationConfig(),
+						messageTemplate,
+						templateContext);
 
 				result.put(check,
 						new AttributeState(check.getDisplayName(), validationresult.getState(),

@@ -16,8 +16,9 @@ import io.github.furti.jmxhealth.server.validation.ValidationResult;
 public class ValidationTypeTest {
 
 	@Test(dataProvider = "validateEqualsData")
-	public void validateEquals(Object attributeValue, Map<String, Object> validationConfig, ValidationResult expected)
-			throws Exception {
+	public void validateEquals(Object attributeValue,
+			Map<String, Object> validationConfig,
+			ValidationResult expected) throws Exception {
 		validate(attributeValue, validationConfig, expected, ValidationType.EQUALS);
 	}
 
@@ -34,7 +35,8 @@ public class ValidationTypeTest {
 	}
 
 	@Test(dataProvider = "validateLowerThanData")
-	public void validateLowerThan(Object attributeValue, Map<String, Object> validationConfig,
+	public void validateLowerThan(Object attributeValue,
+			Map<String, Object> validationConfig,
 			ValidationResult expected) throws Exception {
 		validate(attributeValue, validationConfig, expected, ValidationType.LOWER);
 	}
@@ -49,19 +51,22 @@ public class ValidationTypeTest {
 				{ 21, validationConfig, new ValidationResult(HealthState.OK) }, //
 				{ 30, validationConfig, new ValidationResult(HealthState.OK) }, //
 				{ 20, validationConfig,
-						new ValidationResult(HealthState.WARN, "Actual value \"20\" is less than or equal to \"20\"") }, //
+						new ValidationResult(HealthState.WARN,
+								"Actual value \"20\" is less than or equal to \"20\"") }, //
 				{ 11, validationConfig,
-						new ValidationResult(HealthState.WARN, "Actual value \"11\" is less than or equal to \"20\"") }, //
+						new ValidationResult(HealthState.WARN,
+								"Actual value \"11\" is less than or equal to \"20\"") }, //
 				{ 10, validationConfig,
 						new ValidationResult(HealthState.ALERT,
 								"Actual value \"10\" is less than or equal to \"10\"") }, //
-				{ 5, validationConfig,
-						new ValidationResult(HealthState.ALERT, "Actual value \"5\" is less than or equal to \"10\"") } //
+				{ 5, validationConfig, new ValidationResult(HealthState.ALERT,
+						"Actual value \"5\" is less than or equal to \"10\"") } //
 		};
 	}
 
 	@Test(dataProvider = "validateGreaterThanData")
-	public void validateGreaterThan(Object attributeValue, Map<String, Object> validationConfig,
+	public void validateGreaterThan(Object attributeValue,
+			Map<String, Object> validationConfig,
 			ValidationResult expected) throws Exception {
 		validate(attributeValue, validationConfig, expected, ValidationType.GREATER);
 	}
@@ -89,9 +94,11 @@ public class ValidationTypeTest {
 		};
 	}
 
-	private void validate(Object attributeValue, Map<String, Object> validationConfig, ValidationResult expected,
+	private void validate(Object attributeValue,
+			Map<String, Object> validationConfig,
+			ValidationResult expected,
 			ValidationType type) throws Exception {
-		ValidationResult actual = type.validate(attributeValue, validationConfig);
+		ValidationResult actual = type.validate(attributeValue, validationConfig, null, null);
 
 		assertThat(actual, notNullValue());
 		assertThat(actual.getState(), equalTo(expected.getState()));

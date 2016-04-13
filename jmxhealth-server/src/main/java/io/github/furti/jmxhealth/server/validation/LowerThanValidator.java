@@ -27,7 +27,7 @@ public class LowerThanValidator extends ValueValidatorBase<Number> {
 	}
 
 	@Override
-	protected String buildMessage(Number attributeValue, Number expectedValue) {
+	protected String buildDefaultMessage(Number attributeValue, Number expectedValue) {
 		return "Actual value \"" + attributeValue + "\" is less than or equal to \"" + expectedValue + "\"";
 	}
 }

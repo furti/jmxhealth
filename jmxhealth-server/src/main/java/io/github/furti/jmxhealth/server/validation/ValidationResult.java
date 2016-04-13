@@ -24,12 +24,4 @@ public class ValidationResult {
 	public String getMessage() {
 		return message;
 	}
-
-	public void prefixMessage(String prefix) {
-		if (this.message == null) {
-			this.message = prefix;
-		} else {
-			this.message = prefix + ": " + this.message;
-		}
-	}
 }

@@ -27,16 +27,19 @@ public class TemplateParserTest {
 		bean.put("other", Integer.valueOf(42));
 
 		context.put("bean", bean);
+		context.put("value", 4);
 
 		return new Object[][] { //
 				{ "Simple String", null, "Simple String" }, //
 				{ "${bean.test}", null, "null" }, //
+				{ "${bean.test} ${value}", null, "null null" }, //
 				{ "Value is ${bean.test}", null, "Value is null" }, //
 				{ "${bean.test} is the value", null, "null is the value" }, //
 				{ "Got ${bean.test} as value", null, "Got null as value" }, //
 				{ "First value is ${bean.test} and second value is ${bean.other} ", null,
 						"First value is null and second value is null " }, //
 				{ "${bean.test}", context, "A test string" }, //
+				{ "${bean.test} ${value}", context, "A test string 4" }, //
 				{ "Value is ${bean.test}", context, "Value is A test string" }, //
 				{ "${bean.test} is the value", context, "A test string is the value" }, //
 				{ "Got ${bean.test} as value", context, "Got A test string as value" }, //
