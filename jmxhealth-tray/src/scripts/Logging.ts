@@ -45,9 +45,4 @@ namespace jmxhealth {
     console.error = function(message?: any, ...optionalParams: any[]) {
         log.error(formatMessage(message, optionalParams));
     };
-
-    console.error('test1');
-    console.log('test object %o', {
-        value: 1
-    });
 }
