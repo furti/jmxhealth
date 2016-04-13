@@ -33,6 +33,7 @@ cp "emptyconfig.json" "$APP_DIR/config.json"
 cp -r "target" "$APP_DIR/target"
 cp -r "icons" "$APP_DIR/icons"
 cp -r "node_modules/pubsub-js" "$APP_DIR/node_modules/pubsub-js"
+cp -r "node_modules/simple-node-logger" "$APP_DIR/node_modules/simple-node-logger"
 
 cd $APP_DIR
 7z a "../bin/$VERSION.zip" "**"
