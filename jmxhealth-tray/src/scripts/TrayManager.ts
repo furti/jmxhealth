@@ -11,7 +11,6 @@ namespace jmxhealth {
         private tray: any;
         private popup: any;
         private popupShown: boolean;
-        private creditsPopup: any;
 
         constructor() {
 
@@ -74,7 +73,7 @@ namespace jmxhealth {
         }
 
         private showCredits(): void {
-            gui.Window.open('./credits.html', {
+            gui.Window.open('./health-credits.html', {
                 frame: true,
                 resizable: false,
                 width: 300,
