@@ -35,6 +35,8 @@ cp -r "target" "$APP_DIR/target"
 cp -r "icons" "$APP_DIR/icons"
 cp -r "node_modules/pubsub-js" "$APP_DIR/node_modules/pubsub-js"
 cp -r "node_modules/simple-node-logger" "$APP_DIR/node_modules/simple-node-logger"
+cp -r "node_modules/open" "$APP_DIR/node_modules/open"
+cp -r "node_modules/node-notifier" "$APP_DIR/node_modules/node-notifier"
 
 cd $APP_DIR
 7z a "../bin/$VERSION.zip" "**"

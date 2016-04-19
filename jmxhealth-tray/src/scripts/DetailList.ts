@@ -7,16 +7,25 @@ namespace jmxhealth {
         static $injects = ['$scope'];
 
         public failedStates: DetailStateResponse[];
+        private visible: boolean;
         // private filterState: api.StateResponse;
 
         constructor($scope: angular.IScope) {
+            this.visible = false;
+
+            currentWindow.on('close', (event: any) => {
+                currentWindow.hide();
+                this.visible = false;
+            });
+
+            pubsub.subscribe(topic.OVERALL_STATE, (message, state) => {
+                if (this.shouldNotify()) {
+                    this.notify(state);
+                }
+            });
+
             pubsub.subscribe(topic.FAILED_STATES, (message, failed) => {
                 this.failedStates = this.prepareStates(failed);
-
-                if (this.shouldShow()) {
-                    this.show();
-                }
-
                 $scope.$apply();
             });
 
@@ -38,9 +47,10 @@ namespace jmxhealth {
         public show(): void {
             currentWindow.show();
             currentWindow.focus();
+            this.visible = true;
         }
 
-        public shouldShow(): boolean {
+        public shouldNotify(): boolean {
             if (!this.failedStates || this.failedStates.length === 0) {
                 return false;
             }
@@ -84,6 +94,21 @@ namespace jmxhealth {
             }
 
             return true;
+        }
+
+        private notify(state: string): void {
+            var promise: angular.IPromise<void>;
+
+            if (state === 'WARN') {
+                promise = Notify.warn('Watch out. It seems the something is not running as expected. Check the details before it get\'s really bad.');
+            }
+            else if (state === 'ALERT') {
+                promise = Notify.error('Uh Oh! Something went terribly wrong. Check the details before everything get\'s even worse.');
+            }
+
+            promise.then(() => {
+                this.show();
+            });
         }
 
         private prepareStates(states: api.StateResponse[]): DetailStateResponse[] {

@@ -1,5 +1,6 @@
 namespace jmxhealth {
     var pubsub: pubsub.PubSub = require('pubsub-js'),
+        open: (path: string) => void = require('open'),
         stateManager: StateManager,
         config: TrayConfig = require('./config.json'),
         pollTimeInSeconds = 30,
@@ -37,6 +38,9 @@ namespace jmxhealth {
         public start(): void {
             if (!config.servers || config.servers.length === 0) {
                 pubsub.publish(topic.NO_SERVERS, 'No Servers configured');
+                Notify.warn('No servers configured. Add some servers in the config.json and restart the application.').then(() => {
+                    open(process.cwd());
+                });
             }
             else {
                 this.requests = this.prepareConfig();

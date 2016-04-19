@@ -15,6 +15,7 @@
     "./src/scripts/include.d.ts",
     "./src/scripts/Logging.ts",
     "./src/scripts/Main.ts",
+    "./src/scripts/Notify.ts",
     "./src/scripts/StateManager.ts",
     "./src/scripts/TrayConfig.ts",
     "./src/scripts/TrayManager.ts",
