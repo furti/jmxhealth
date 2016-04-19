@@ -20,7 +20,7 @@
           <img ng-src="{{$ctrl.attributeIcon(attribute)}}" class="md-avatar" />
           <div class="md-list-item-text" layout="column">
             <h3>{{ attribute.attributeName }} - {{ attribute.timestamp }}</h3>
-            <p ng-repeat="line in attribute.lines">{{ line }}</p>
+            <p ng-repeat="line in attribute.lines track by $index">{{ line }}</p>
           </div>
         </md-list-item>
       </md-list>
