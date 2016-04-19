@@ -36,7 +36,7 @@ public class EqualsValidator implements AttributeValidator {
 
 		if (messageTemplate != null) {
 			renderContext.put("actualValue", attributeValue);
-			renderContext.put("expectedValue", attributeValue);
+			renderContext.put("expectedValue", expectedValue);
 
 			return messageTemplate.render(renderContext);
 		}
