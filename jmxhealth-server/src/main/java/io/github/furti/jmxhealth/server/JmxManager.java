@@ -92,7 +92,7 @@ public class JmxManager {
 
 				LOG.error("Error polling " + connection.getServerConfig(), ex);
 				this.stateManager.remoteState(connection.getServerConfig(),
-						Arrays.asList(new AttributeState("POLL", HealthState.ALERT, HealthUtils
+						Arrays.asList(new AttributeState("Remote Check", HealthState.ALERT, HealthUtils
 								.createMessageWithStacktrace("Error polling Remote Server", ex))));
 			}
 		}
