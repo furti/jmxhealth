@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.github.furti.jmxhealth</groupId>
 		<artifactId>jmxhealth</artifactId>
-		<version>0.4.0</version>
+		<version>0.4.1-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>

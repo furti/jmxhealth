@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.furti.jmxhealth</groupId>
 	<artifactId>jmxhealth</artifactId>
-	<version>0.4.0</version>
+	<version>0.4.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<url>https://github.com/furti/jmxhealth</url>
@@ -22,7 +22,7 @@
 	<scm>
 		<connection>scm:git:https://github.com/furti/jmxhealth</connection>
 		<developerConnection>scm:git:https://github.com/furti/jmxhealth</developerConnection>
-		<tag>0.4.0</tag>
+		<tag>0.1.0</tag>
 	</scm>
 
 	<dependencyManagement>
