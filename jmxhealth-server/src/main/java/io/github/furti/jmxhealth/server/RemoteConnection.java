@@ -71,7 +71,8 @@ public class RemoteConnection {
 				Collection<ObjectName> beanNames = getConnection()
 						.queryNames(new ObjectName(watcher.getBeanQuery()), null);
 
-				if (beanNames.isEmpty()) {
+				if (beanNames.isEmpty() && (watcher.getPassOnMissingBeans() == null
+						|| !watcher.getPassOnMissingBeans().booleanValue())) {
 					throw new RuntimeException(
 							"No Beans where found for query " + watcher.getBeanQuery());
 				}

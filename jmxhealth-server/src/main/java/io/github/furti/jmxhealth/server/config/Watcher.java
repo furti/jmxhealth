@@ -5,6 +5,7 @@ import java.util.List;
 public class Watcher {
 	private String beanName;
 	private String beanQuery;
+	private Boolean passOnMissingBeans;
 	private List<Check> checks;
 
 	public String getBeanName() {
@@ -34,5 +35,13 @@ public class Watcher {
 
 	public void setBeanQuery(String beanQuery) {
 		this.beanQuery = beanQuery;
+	}
+
+	public Boolean getPassOnMissingBeans() {
+		return passOnMissingBeans;
+	}
+
+	public void setPassOnMissingBeans(Boolean passOnMissingBeans) {
+		this.passOnMissingBeans = passOnMissingBeans;
 	}
 }

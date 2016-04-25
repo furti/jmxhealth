@@ -63,6 +63,9 @@ One of beanName ore beanQuery must be specified. If both are specified it's not 
 If beanName is set the MBean with the given name will be validated with the given checks.
 If beanQuery is set all MBeans matching this query will be validated with the given checks.
 
+#### passOnMissingBeans
+This property can be used in combination with the _beanQuery_ Property. When set no alert will be reported when no beans are found for the given query. If the property is absent or set to false a alert will be raised when no beans are found. 
+
 #### checks
 A list of checks to perform on this bean.
 See _Check subfields_ below.
@@ -201,6 +204,7 @@ Following is a example configuration that monitors some properties of a Tomcat i
       }]
     }, {
       "beanQuery": "Catalina:type=RequestProcessor,worker=\"http-apr-9080\",name=*",
+      "passOnMissingBeans": true,
       "checks": [{
         "displayName": "RequestTime",
         "attributeName": "requestProcessingTime",
