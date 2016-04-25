@@ -54,7 +54,7 @@ public class JmxManager {
 		this.templateParser = templateParser;
 	}
 
-	@Scheduled(fixedDelay = 10000, initialDelay = 1000)
+	@Scheduled(fixedDelay = 30000, initialDelay = 1000)
 	public void pollServers() {
 		if (!initialized) {
 			return;
